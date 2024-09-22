@@ -55,7 +55,7 @@ const ResultScreen = ({ result, correctAnswer, onRetry }) => {
           marginBottom: '40px',
         }}
       >
-        the right answer was '{displayAnswer}'
+        {`the right answer was '${displayAnswer}'`}
       </p>
 
       {/* Buttons */}
