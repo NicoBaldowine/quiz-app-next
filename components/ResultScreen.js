@@ -4,7 +4,8 @@ import { Button } from '@nextui-org/react';
 
 const ResultScreen = ({ result, correctAnswer, onRetry }) => {
   // Determine if the answer is correct or incorrect
-  const isCorrect = result.toLowerCase() === 'correct' || result.toLowerCase() === 'correct!';
+  const isCorrect =
+    result.toLowerCase() === 'correct' || result.toLowerCase() === 'correct!';
 
   // Set emoji based on the result
   const emoji = isCorrect ? '✨' : '☔️';
@@ -35,13 +36,26 @@ const ResultScreen = ({ result, correctAnswer, onRetry }) => {
       <div style={{ fontSize: '48px', marginBottom: '16px' }}>{emoji}</div>
 
       {/* Title */}
-      <h2 style={{ fontSize: '32px', fontFamily: 'Inter, sans-serif', marginBottom: '8px' }}>
+      <h2
+        style={{
+          fontSize: '32px',
+          fontFamily: 'Inter, sans-serif',
+          marginBottom: '8px',
+        }}
+      >
         {title}
       </h2>
 
       {/* Description */}
-      <p style={{ fontSize: '16px', color: '#BAAAAA', fontFamily: 'Inter, sans-serif', marginBottom: '40px' }}>
-        the right answer was "{displayAnswer}"
+      <p
+        style={{
+          fontSize: '16px',
+          color: '#BAAAAA',
+          fontFamily: 'Inter, sans-serif',
+          marginBottom: '40px',
+        }}
+      >
+        the right answer was '{displayAnswer}'
       </p>
 
       {/* Buttons */}
@@ -84,7 +98,6 @@ const ResultScreen = ({ result, correctAnswer, onRetry }) => {
 };
 
 export default ResultScreen;
-
 
 
 
