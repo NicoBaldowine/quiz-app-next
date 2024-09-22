@@ -3,14 +3,17 @@ import Link from 'next/link';
 import { Button } from '@nextui-org/react';
 
 const ResultScreen = ({ result, correctAnswer, onRetry }) => {
-  // Determine if the answer is correct
-  const isCorrect = result.toLowerCase() === 'correct';
+  // Determine if the answer is correct or incorrect
+  const isCorrect = result.toLowerCase() === 'correct' || result.toLowerCase() === 'correct!';
 
   // Set emoji based on the result
   const emoji = isCorrect ? '✨' : '☔️';
 
   // Set the title based on the result
   const title = isCorrect ? 'Correct answer' : 'Wrong answer';
+
+  // Ensure that the correctAnswer is always shown
+  const displayAnswer = correctAnswer || 'N/A';
 
   return (
     <div
@@ -32,26 +35,13 @@ const ResultScreen = ({ result, correctAnswer, onRetry }) => {
       <div style={{ fontSize: '48px', marginBottom: '16px' }}>{emoji}</div>
 
       {/* Title */}
-      <h2
-        style={{
-          fontSize: '32px',
-          fontFamily: 'Inter, sans-serif',
-          marginBottom: '8px',
-        }}
-      >
+      <h2 style={{ fontSize: '32px', fontFamily: 'Inter, sans-serif', marginBottom: '8px' }}>
         {title}
       </h2>
 
-      {/* Correct Answer Display */}
-      <p
-        style={{
-          fontSize: '16px',
-          color: '#BAAAAA',
-          fontFamily: 'Inter, sans-serif',
-          marginBottom: '40px',
-        }}
-      >
-        the right answer was '{correctAnswer}'
+      {/* Description */}
+      <p style={{ fontSize: '16px', color: '#BAAAAA', fontFamily: 'Inter, sans-serif', marginBottom: '40px' }}>
+        the right answer was "{displayAnswer}"
       </p>
 
       {/* Buttons */}
@@ -94,3 +84,9 @@ const ResultScreen = ({ result, correctAnswer, onRetry }) => {
 };
 
 export default ResultScreen;
+
+
+
+
+
+
