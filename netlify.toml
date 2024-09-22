@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = ".next"  # or "out" if using static export
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = true
