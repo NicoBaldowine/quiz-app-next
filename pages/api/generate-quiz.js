@@ -4,7 +4,7 @@ import axios from 'axios';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { title } = req.body; // Change from topic to title
+    const { title } = req.body;
 
     if (!title) {
       return res.status(400).json({ error: 'Title is required.' });
@@ -40,7 +40,7 @@ Ensure the JSON is properly formatted and does not include any extra characters 
         },
         {
           headers: {
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // Correct reference without process.env prefix
             'Content-Type': 'application/json',
           },
         }
@@ -50,7 +50,6 @@ Ensure the JSON is properly formatted and does not include any extra characters 
       const generatedText = response.data.choices[0].message.content;
       console.log('Generated Text:', generatedText);
 
-      // Parse the JSON response
       let quizData;
 
       try {
@@ -63,11 +62,9 @@ Ensure the JSON is properly formatted and does not include any extra characters 
       const { question, answers, correctAnswer: correctOptionLetter } = quizData;
       console.log('Parsed Quiz Data:', quizData);
 
-      // Map the options to an array
       const optionsArray = ['A', 'B', 'C', 'D'];
       const answersArray = optionsArray.map((option) => answers[option]);
 
-      // Get the correct answer text
       const optionIndexMap = { A: 0, B: 1, C: 2, D: 3 };
       const correctAnswerIndex = optionIndexMap[correctOptionLetter.trim().toUpperCase()];
       const correctAnswer = answersArray[correctAnswerIndex];
