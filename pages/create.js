@@ -2,6 +2,8 @@
 
 import CreateQuizScreen from '../components/CreateQuizScreen';
 
-export default function CreateQuizPage() {
+const CreatePage = () => {
   return <CreateQuizScreen />;
-}
+};
+
+export default CreatePage;

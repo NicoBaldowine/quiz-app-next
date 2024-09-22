@@ -2,6 +2,8 @@
 
 import HomeScreen from '../components/HomeScreen';
 
-export default function HomePage() {
+const HomePage = () => {
   return <HomeScreen />;
-}
+};
+
+export default HomePage;

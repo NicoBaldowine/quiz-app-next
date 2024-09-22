@@ -19,15 +19,11 @@ const HomeScreen = () => {
           marginTop: '1rem',
         }}
       >
-        <Link href="/account" passHref legacyBehavior>
-          <a>
-            <Button color="primary">Account</Button>
-          </a>
+        <Link href="/account" passHref>
+          <Button color="primary">Account</Button>
         </Link>
-        <Link href="/create" passHref legacyBehavior>
-          <a>
-            <Button color="secondary">Create a Quiz</Button>
-          </a>
+        <Link href="/create" passHref>
+          <Button color="secondary">Create a Quiz</Button>
         </Link>
       </div>
 
