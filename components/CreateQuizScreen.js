@@ -97,6 +97,7 @@ const CreateQuizScreen = () => {
                 color: '#fff',
                 border: '1px solid #555',
                 borderRadius: '4px',
+                boxSizing: 'border-box', // Ensures proper width calculation
               }}
             />
             <br />
@@ -138,6 +139,7 @@ const CreateQuizScreen = () => {
 };
 
 export default CreateQuizScreen;
+
 
 
 
