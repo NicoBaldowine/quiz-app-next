@@ -32,13 +32,26 @@ const ResultScreen = ({ result, correctAnswer, onRetry }) => {
       <div style={{ fontSize: '48px', marginBottom: '16px' }}>{emoji}</div>
 
       {/* Title */}
-      <h2 style={{ fontSize: '32px', fontFamily: 'Inter, sans-serif', marginBottom: '8px' }}>
+      <h2
+        style={{
+          fontSize: '32px',
+          fontFamily: 'Inter, sans-serif',
+          marginBottom: '8px',
+        }}
+      >
         {title}
       </h2>
 
       {/* Correct Answer Display */}
-      <p style={{ fontSize: '16px', color: '#BAAAAA', fontFamily: 'Inter, sans-serif', marginBottom: '40px' }}>
-        the right answer was "{correctAnswer}"
+      <p
+        style={{
+          fontSize: '16px',
+          color: '#BAAAAA',
+          fontFamily: 'Inter, sans-serif',
+          marginBottom: '40px',
+        }}
+      >
+        the right answer was '{correctAnswer}'
       </p>
 
       {/* Buttons */}
@@ -81,9 +94,3 @@ const ResultScreen = ({ result, correctAnswer, onRetry }) => {
 };
 
 export default ResultScreen;
-
-
-
-
-
-
