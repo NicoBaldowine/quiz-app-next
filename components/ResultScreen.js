@@ -27,13 +27,15 @@ const ResultScreen = ({ result, correctAnswer, onRetry }) => {
         height: '100vh', // Full viewport height
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
+        justifyContent: 'flex-start', // Align content to the top
         alignItems: 'center',
         padding: '16px', // Add padding for spacing
       }}
     >
       {/* Emoji */}
-      <div style={{ fontSize: '48px', marginBottom: '16px' }}>{emoji}</div>
+      <div style={{ fontSize: '48px', marginBottom: '16px', marginTop: '40px' }}>
+        {emoji}
+      </div>
 
       {/* Title */}
       <h2
