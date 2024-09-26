@@ -15,8 +15,8 @@ const HomeScreen = () => {
       localStorage.setItem(testKey, "test");
       localStorage.removeItem(testKey);
       return true;
-    } catch (error) {
-      // Safely handling error, but not using the variable 'e' to avoid lint issues
+    } catch (_error) {
+      // Safely handling error, but not using the variable '_error' to avoid lint issues
       return false;
     }
   };
@@ -119,6 +119,7 @@ const HomeScreen = () => {
 };
 
 export default HomeScreen;
+
 
 
 
