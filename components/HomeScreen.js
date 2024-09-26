@@ -35,11 +35,7 @@ const HomeScreen = () => {
     }
   }, [quizzes]);
 
-  // Add quiz logic (if needed, ensure you use it)
-  const addQuiz = (newQuiz) => {
-    const updatedQuizzes = [...quizzes, newQuiz];
-    setQuizzes(updatedQuizzes);
-  };
+  // No need to keep the 'addQuiz' variable here since it's not being used in the logic.
 
   return (
     <div className="flex flex-col min-h-screen pb-16 bg-gray-900 text-white">
