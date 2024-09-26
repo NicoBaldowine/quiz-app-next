@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { Button } from "@nextui-org/react";
-import { Home, PlusCircle, User, MoreVertical, Check, X } from "lucide-react";
+import {
+  Home,
+  PlusCircle,
+  User,
+  MoreVertical,
+  Check,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 const HomeScreen = () => {
@@ -15,8 +22,9 @@ const HomeScreen = () => {
       localStorage.setItem(testKey, "test");
       localStorage.removeItem(testKey);
       return true;
-    } catch (_error) {
-      // Safely handling error, but not using the variable '_error' to avoid lint issues
+    } catch (error) {
+      // Safely handling error
+      console.error("localStorage is not available:", error);
       return false;
     }
   };
@@ -29,7 +37,7 @@ const HomeScreen = () => {
     }
   }, []);
 
-  // Save quizzes to localStorage when they change
+  // Save quizzes to localStorage when quizzes change
   useEffect(() => {
     if (isLocalStorageAvailable()) {
       localStorage.setItem("quizzes", JSON.stringify(quizzes));
@@ -119,6 +127,7 @@ const HomeScreen = () => {
 };
 
 export default HomeScreen;
+
 
 
 
