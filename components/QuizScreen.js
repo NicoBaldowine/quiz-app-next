@@ -21,7 +21,6 @@ const QuizScreen = ({ question, answers, correctAnswer, onRetry }) => {
   const optionLetters = ['A', 'B', 'C', 'D'];
 
   if (result) {
-    // Pass the result and correctAnswer to ResultScreen
     return <ResultScreen result={result} correctAnswer={correctAnswer} onRetry={onRetry} />;
   }
 
@@ -73,11 +72,10 @@ const styles = {
     textAlign: 'left',
     width: '100%',
     cursor: isDisabled ? 'not-allowed' : 'pointer',
-    border: '1.5px solid rgba(255, 255, 255, 0.3)', // Flat solid border
-    boxShadow: 'none', // Remove any shadow
+    border: '1.5px solid rgba(255, 255, 255, 0.3)', 
     transition: 'background-color 0.3s ease',
     '&:hover': {
-      backgroundColor: !isDisabled ? 'rgba(255, 255, 255, 0.1)' : undefined, // White with 10% opacity on hover
+      backgroundColor: !isDisabled ? 'rgba(255, 255, 255, 0.1)' : undefined,
     },
   }),
 };

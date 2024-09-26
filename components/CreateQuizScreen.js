@@ -3,7 +3,7 @@ import axios from 'axios';
 import QuizScreen from './QuizScreen';
 import Link from 'next/link';
 import { Button } from '@nextui-org/react';
-import { AiOutlineClose } from 'react-icons/ai'; // Importing the close icon
+import { AiOutlineClose } from 'react-icons/ai';
 
 const CreateQuizScreen = () => {
   const [title, setTitle] = useState('');
@@ -139,6 +139,8 @@ const CreateQuizScreen = () => {
 };
 
 export default CreateQuizScreen;
+
+
 
 
 
