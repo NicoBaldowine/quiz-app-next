@@ -35,6 +35,7 @@ const HomeScreen = () => {
     }
   }, [quizzes]);
 
+  // Add quiz logic (if needed, ensure you use it)
   const addQuiz = (newQuiz) => {
     const updatedQuizzes = [...quizzes, newQuiz];
     setQuizzes(updatedQuizzes);
@@ -123,6 +124,7 @@ const HomeScreen = () => {
 };
 
 export default HomeScreen;
+
 
 
 
