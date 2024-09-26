@@ -15,7 +15,8 @@ const HomeScreen = () => {
       localStorage.setItem(testKey, "test");
       localStorage.removeItem(testKey);
       return true;
-    } catch (e) {
+    } catch (error) {
+      // Safely handling error, but not using the variable 'e' to avoid lint issues
       return false;
     }
   };
@@ -34,8 +35,6 @@ const HomeScreen = () => {
       localStorage.setItem("quizzes", JSON.stringify(quizzes));
     }
   }, [quizzes]);
-
-  // No need to keep the 'addQuiz' variable here since it's not being used in the logic.
 
   return (
     <div className="flex flex-col min-h-screen pb-16 bg-gray-900 text-white">
@@ -120,6 +119,7 @@ const HomeScreen = () => {
 };
 
 export default HomeScreen;
+
 
 
 
