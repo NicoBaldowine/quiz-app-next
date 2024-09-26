@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@nextui-org/react"
-import { Home, PlusCircle, User, MoreVertical, Trash2, Check, X } from "lucide-react"
+import { Home, PlusCircle, User, MoreVertical, Check, X } from "lucide-react"
 import { useEffect, useState } from "react"
 
 // Mock data for quizzes
