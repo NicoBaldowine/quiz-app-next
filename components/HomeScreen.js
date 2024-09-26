@@ -88,27 +88,27 @@ const HomeScreen = () => {
         <div className="w-full px-4">
           <ul className="flex justify-around py-2">
             <li>
-              <Link href="/" className="flex flex-col items-center text-xs text-white">
-                <Home className="h-6 w-6" />
-                <span>Home</span>
+              <Link href="/" passHref legacyBehavior>
+                <a className="flex flex-col items-center text-xs text-white">
+                  <Home className="h-6 w-6" />
+                  <span>Home</span>
+                </a>
               </Link>
             </li>
             <li>
-              <Link
-                href="/create"
-                className="flex flex-col items-center text-xs text-gray-400 hover:text-gray-300 transition-colors duration-200"
-              >
-                <PlusCircle className="h-6 w-6" />
-                <span>Create Quiz</span>
+              <Link href="/create" passHref legacyBehavior>
+                <a className="flex flex-col items-center text-xs text-gray-400 hover:text-gray-300 transition-colors duration-200">
+                  <PlusCircle className="h-6 w-6" />
+                  <span>Create Quiz</span>
+                </a>
               </Link>
             </li>
             <li>
-              <Link
-                href="/account"
-                className="flex flex-col items-center text-xs text-gray-400 hover:text-gray-300 transition-colors duration-200"
-              >
-                <User className="h-6 w-6" />
-                <span>Account</span>
+              <Link href="/account" passHref legacyBehavior>
+                <a className="flex flex-col items-center text-xs text-gray-400 hover:text-gray-300 transition-colors duration-200">
+                  <User className="h-6 w-6" />
+                  <span>Account</span>
+                </a>
               </Link>
             </li>
           </ul>
@@ -119,6 +119,7 @@ const HomeScreen = () => {
 };
 
 export default HomeScreen;
+
 
 
 
