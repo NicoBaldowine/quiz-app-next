@@ -8,11 +8,37 @@ import { useEffect, useState } from "react";
 const HomeScreen = () => {
   const [quizzes, setQuizzes] = useState([]);
 
-  // Load quizzes from localStorage on component mount
+  // Check if localStorage is available in the browser
+  const isLocalStorageAvailable = () => {
+    try {
+      const testKey = "__storage_test__";
+      localStorage.setItem(testKey, "test");
+      localStorage.removeItem(testKey);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Load quizzes from localStorage when component mounts
   useEffect(() => {
-    const storedQuizzes = JSON.parse(localStorage.getItem("quizzes")) || [];
-    setQuizzes(storedQuizzes);
+    if (isLocalStorageAvailable()) {
+      const storedQuizzes = JSON.parse(localStorage.getItem("quizzes")) || [];
+      setQuizzes(storedQuizzes);
+    }
   }, []);
+
+  // Save quizzes to localStorage when they change
+  useEffect(() => {
+    if (isLocalStorageAvailable()) {
+      localStorage.setItem("quizzes", JSON.stringify(quizzes));
+    }
+  }, [quizzes]);
+
+  const addQuiz = (newQuiz) => {
+    const updatedQuizzes = [...quizzes, newQuiz];
+    setQuizzes(updatedQuizzes);
+  };
 
   return (
     <div className="flex flex-col min-h-screen pb-16 bg-gray-900 text-white">
@@ -97,6 +123,8 @@ const HomeScreen = () => {
 };
 
 export default HomeScreen;
+
+
 
 
 
