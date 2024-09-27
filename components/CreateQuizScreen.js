@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import QuizScreen from "./QuizScreen";
 import { X, Loader } from "lucide-react";

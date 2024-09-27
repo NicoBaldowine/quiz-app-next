@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { Button } from "@nextui-org/react";
-import { Home, PlusCircle, User, MoreVertical, Check, X, Play, Trash2 } from "lucide-react";
+import { Home, PlusCircle, User } from "lucide-react";
 import { supabase } from '../lib/supabaseClient';
 
 const HomeScreen = () => {
