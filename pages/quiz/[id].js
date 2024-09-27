@@ -1,7 +1,7 @@
 // pages/quiz/[id].js
 
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import QuizScreen from '../../components/QuizScreen'; // Adjust path if necessary
 
@@ -15,9 +15,11 @@ const QuizPage = () => {
     if (id) {
       fetchQuiz();
     }
-  }, [id]);
+  }, [id, fetchQuiz]);
 
-  const fetchQuiz = async () => {
+  const fetchQuiz = useCallback(async () => {
+    if (!id) return;
+
     const { data, error } = await supabase
       .from('quizzes')
       .select('*')
@@ -29,7 +31,7 @@ const QuizPage = () => {
     } else {
       setQuiz(data);
     }
-  };
+  }, [id]);
 
   const handleRetry = async () => {
     // Reset the quiz or generate a new one
@@ -46,7 +48,7 @@ const QuizPage = () => {
       answers={quiz.answers}
       correctAnswer={quiz.correctAnswer}
       onRetry={handleRetry}
-      title={quiz.title}
+      quizId={id}
     />
   );
 };

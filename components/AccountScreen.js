@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, MessageSquare, Bug, LogOut } from 'lucide-react';
-import Link from 'next/link';
+// Remove the following line if Link is not used
+// import Link from 'next/link';
 
 const AccountScreen = () => {
   const menuItems = [

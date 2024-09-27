@@ -26,7 +26,7 @@ const CreateQuizScreen = () => {
       const quizData = response.data;
 
       // Store quiz in Supabase
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('quizzes')
         .insert([
           { 
@@ -39,15 +39,12 @@ const CreateQuizScreen = () => {
           }
         ]);
 
-      if (error) {
-        console.error("Supabase error:", error);
-        throw new Error(error.message);
-      }
+      if (error) throw error;
 
       setQuizData(quizData);
     } catch (error) {
       console.error("Error generating quiz:", error.message);
-      setError(`Failed to generate quiz: ${error.message}`);
+      setError("Failed to generate quiz. Please try again.");
     } finally {
       setLoading(false);
     }
