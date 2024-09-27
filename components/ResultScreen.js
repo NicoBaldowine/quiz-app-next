@@ -1,30 +1,24 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
 import Link from "next/link";
 import { X } from "lucide-react";
 import { supabase } from '../lib/supabaseClient';
 
-const ResultScreen = ({ result, correctAnswer, onRetry, quizId }) => {
-  // Determine if the answer is correct or incorrect
-  const isCorrect =
-    result.toLowerCase() === "correct" || result.toLowerCase() === "correct!";
+const ResultScreen = ({ result, correctAnswer, onNextQuestion, quizId, topic }) => {
+  const isCorrect = result.toLowerCase() === "correct" || result.toLowerCase() === "correct!";
+  const isTimeUp = result.toLowerCase() === "time's up!";
 
-  // Set emoji based on the result
-  const emoji = isCorrect ? "✨" : "☔️";
-
-  // Set the title based on the result
-  const title = isCorrect ? "Correct answer" : "Wrong answer";
-
-  // Ensure that the correctAnswer is always shown
-  const displayAnswer = correctAnswer || "N/A";
+  const emoji = isCorrect ? "✨" : isTimeUp ? "⌛️" : "☔️";
+  const title = isCorrect ? "Correct answer" : isTimeUp ? "Time's up!" : "Wrong answer";
 
   useEffect(() => {
     console.log('Quiz ID:', quizId);
     console.log('Result:', result);
+    console.log('Topic:', topic);
 
     const updateQuizScore = async () => {
-      const field = result.toLowerCase() === "correct!" ? 'correct' : 'incorrect';
+      const field = isCorrect ? 'correct' : 'incorrect';
       
       // First, get the current score
       const { data, error: fetchError } = await supabase
@@ -49,8 +43,21 @@ const ResultScreen = ({ result, correctAnswer, onRetry, quizId }) => {
       }
     };
 
-    updateQuizScore();
-  }, [result, quizId]);
+    // Only update the score if it's not a "Time's up" scenario
+    if (!isTimeUp) {
+      updateQuizScore();
+    }
+  }, [quizId, result, isCorrect, isTimeUp, topic]);
+
+  const handleNextQuestion = async () => {
+    console.log("Next Question button clicked");
+    if (typeof onNextQuestion === 'function') {
+      console.log("Calling onNextQuestion function");
+      await onNextQuestion();
+    } else {
+      console.error("onNextQuestion is not a function", onNextQuestion);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
@@ -75,16 +82,18 @@ const ResultScreen = ({ result, correctAnswer, onRetry, quizId }) => {
           <h2 className="text-3xl font-bold text-center mb-2">{title}</h2>
 
           {/* Description */}
-          <p className="text-base text-gray-400 mb-10">{`The right answer was '${displayAnswer}'`}</p>
+          <p className="text-base text-gray-400 mb-10">
+            {isTimeUp ? "You ran out of time!" : `The correct answer was: ${correctAnswer}`}
+          </p>
         </div>
 
         {/* Buttons at the bottom */}
         <div className="w-full mb-4">
           <button
-            onClick={onRetry}
+            onClick={handleNextQuestion}
             className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-md mb-4"
           >
-            Do it again!
+            Next Question
           </button>
 
           <Link href="/" passHref>

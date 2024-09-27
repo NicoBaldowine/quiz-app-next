@@ -44,8 +44,8 @@ const HomeScreen = () => {
   return (
     <div className="flex flex-col min-h-screen pb-16 bg-gray-900 text-white">
       <main className="flex-1 w-full overflow-y-auto">
-        <h1 className="text-3xl font-bold p-6">My Quizzes</h1>
-        <div className="space-y-4 px-4">
+        <h1 className="text-3xl font-bold p-6">Quizzes</h1>
+        <div className="grid grid-cols-2 gap-3 px-3">
           {quizzes.length === 0 ? (
             <EmptyQuizState />
           ) : (
@@ -85,21 +85,21 @@ const QuizCard = ({ quiz, onDelete }) => {
   }, []);
 
   return (
-    <div className="rounded-lg bg-gray-800 border-b border-gray-700 relative p-4">
-      <div className="flex justify-between items-start">
-        <span className="text-lg text-white">{quiz.title}</span>
+    <div className="rounded-lg bg-gray-800 border border-gray-700 relative p-4 flex flex-col h-full">
+      <div className="flex justify-between items-start mb-2">
+        <span className="text-base text-white font-semibold truncate pr-2 flex-1">{quiz.title}</span>
         <div className="relative" ref={menuRef}>
           <button 
             onClick={() => setShowMenu(!showMenu)} 
-            className="text-white hover:text-gray-300 hover:bg-gray-700 p-1 rounded-full transition-colors"
+            className="text-white hover:text-gray-300 hover:bg-gray-700 p-1.5 rounded-full transition-colors"
           >
-            <MoreVertical className="h-4 w-4" />
+            <MoreVertical className="h-5 w-5" />
           </button>
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
+            <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
               <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                <Link href={`/quiz/${quiz.id}`} className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white">
-                  <Play className="mr-3 h-5 w-5" />
+                <Link href={`/quiz/${quiz.id}`} className="flex items-center px-3 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white">
+                  <Play className="mr-2 h-4 w-4" />
                   Play Again
                 </Link>
                 <button
@@ -107,9 +107,9 @@ const QuizCard = ({ quiz, onDelete }) => {
                     onDelete(quiz.id);
                     setShowMenu(false);
                   }}
-                  className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white"
+                  className="flex items-center w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white"
                 >
-                  <Trash2 className="mr-3 h-5 w-5" />
+                  <Trash2 className="mr-2 h-4 w-4" />
                   Delete
                 </button>
               </div>
@@ -125,9 +125,9 @@ const QuizCard = ({ quiz, onDelete }) => {
         <Link href={`/quiz/${quiz.id}`} passHref>
           <Button
             variant="outline"
-            className="bg-gray-800 text-white border-gray-600 hover:bg-gray-700 hover:text-white"
+            className="bg-gray-800 text-white border border-gray-600 hover:bg-gray-700 hover:text-white rounded-full px-4 py-1 text-sm"
           >
-            Take Quiz
+            Play
           </Button>
         </Link>
       </div>
@@ -136,19 +136,19 @@ const QuizCard = ({ quiz, onDelete }) => {
 };
 
 const ScoreTag = ({ icon: Icon, color, score }) => (
-  <span className={`bg-${color}-600 text-${color}-100 text-xs font-medium px-2.5 py-0.5 rounded-full flex items-center`}>
+  <span className={`bg-${color}-600 text-${color}-100 text-xs font-medium px-2 py-1 rounded-full flex items-center`}>
     <Icon className="h-3 w-3 mr-1" />
     {score}
   </span>
 );
 
 const Navigation = () => (
-  <nav className="bg-gray-800 border-t border-gray-700 fixed bottom-0 left-0 right-0 z-10">
+  <nav className="bg-gray-800 fixed bottom-0 left-0 right-0 z-10">
     <div className="w-full px-4">
-      <ul className="flex justify-around py-2">
-        <NavItem href="/" icon={Home} label="Home" />
-        <NavItem href="/create" icon={PlusCircle} label="Create Quiz" />
-        <NavItem href="/account" icon={User} label="Account" />
+      <ul className="flex justify-around py-3">
+        <NavItem href="/" icon={HomeIcon} label="Home" />
+        <NavItem href="/create" icon={PlusIcon} label="Create" />
+        <NavItem href="/account" icon={UserIcon} label="Profile" />
       </ul>
     </div>
   </nav>
@@ -157,12 +157,35 @@ const Navigation = () => (
 const NavItem = ({ href, icon: Icon, label, active }) => (
   <li>
     <Link href={href} passHref legacyBehavior>
-      <a className={`flex flex-col items-center text-xs ${active ? 'text-white' : 'text-gray-400 hover:text-gray-300'} transition-colors duration-200`}>
-        <Icon className="h-6 w-6" />
+      <a className={`flex flex-col items-center text-xs ${active ? 'text-blue-500' : 'text-gray-400 hover:text-gray-300'} transition-colors duration-200`}>
+        <Icon className="h-6 w-6 mb-1" />
         <span>{label}</span>
       </a>
     </Link>
   </li>
+);
+
+// Custom icons for a more modern look
+const HomeIcon = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    <polyline points="9 22 9 12 15 12 15 22" />
+  </svg>
+);
+
+const PlusIcon = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="16" />
+    <line x1="8" y1="12" x2="16" y2="12" />
+  </svg>
+);
+
+const UserIcon = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
 );
 
 export default HomeScreen;
