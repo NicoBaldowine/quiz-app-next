@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { Button } from "@nextui-org/react";
-import { Home, PlusCircle, User } from "lucide-react";
+import { Home, PlusCircle, User, MoreVertical, Play, Trash2 } from "lucide-react";
 import { supabase } from '../lib/supabaseClient';
 
 const HomeScreen = () => {
@@ -85,48 +85,18 @@ const QuizCard = ({ quiz, onDelete }) => {
   }, []);
 
   return (
-    <div className="rounded-lg bg-gray-800 border border-gray-700 relative p-4 flex flex-col h-full">
-      <div className="flex justify-between items-start mb-2">
-        <span className="text-base text-white font-semibold truncate pr-2 flex-1">{quiz.title}</span>
-        <div className="relative" ref={menuRef}>
-          <button 
-            onClick={() => setShowMenu(!showMenu)} 
-            className="text-white hover:text-gray-300 hover:bg-gray-700 p-1.5 rounded-full transition-colors"
-          >
-            <MoreVertical className="h-5 w-5" />
-          </button>
-          {showMenu && (
-            <div className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
-              <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                <Link href={`/quiz/${quiz.id}`} className="flex items-center px-3 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white">
-                  <Play className="mr-2 h-4 w-4" />
-                  Play Again
-                </Link>
-                <button
-                  onClick={() => {
-                    onDelete(quiz.id);
-                    setShowMenu(false);
-                  }}
-                  className="flex items-center w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="flex justify-between items-center mt-2">
-        <div className="flex gap-2">
-          <ScoreTag icon={Check} color="green" score={quiz.correct || 0} />
-          <ScoreTag icon={X} color="red" score={quiz.incorrect || 0} />
-        </div>
+    <div className="bg-gray-800 p-4 rounded-lg">
+      <h3 className="text-lg font-semibold mb-2">{quiz.title}</h3>
+      <div className="flex justify-between items-center">
+        <Button
+          onClick={() => onDelete(quiz.id)}
+          className="text-red-500 hover:text-red-600"
+        >
+          <Trash2 size={18} />
+        </Button>
         <Link href={`/quiz/${quiz.id}`} passHref>
-          <Button
-            variant="outline"
-            className="bg-gray-800 text-white border border-gray-600 hover:bg-gray-700 hover:text-white rounded-full px-4 py-1 text-sm"
-          >
+          <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+            <Play size={18} />
             Play
           </Button>
         </Link>
