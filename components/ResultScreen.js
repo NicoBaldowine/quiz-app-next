@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabaseClient';
 
 const ResultScreen = ({ result, correctAnswer, onNextQuestion, quizId, topic }) => {
   const isCorrect = result.toLowerCase() === "correct" || result.toLowerCase() === "correct!";
-  const isTimeUp = result.toLowerCase() === "time's up!";
+  const isTimeUp = result.toLowerCase() === "time's up" || result.toLowerCase() === "time's up!";
 
   const emoji = isCorrect ? "✨" : isTimeUp ? "⌛️" : "☔️";
   const title = isCorrect ? "Correct answer" : isTimeUp ? "Time's up!" : "Wrong answer";

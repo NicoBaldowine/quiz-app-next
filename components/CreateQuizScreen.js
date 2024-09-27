@@ -30,25 +30,30 @@ const CreateQuizScreen = () => {
   };
 
   const createQuiz = async () => {
-    const newQuestion = await generateQuestion();
-    if (newQuestion) {
-      const { data, error } = await supabase
-        .from('quizzes')
-        .insert({
-          title: title,
-          question: newQuestion.question,
-          answers: newQuestion.answers,
-          correct_answer: newQuestion.correct_answer,
-          correct: 0,
-          incorrect: 0
-        })
-        .select()
-        .single();
+    try {
+      const newQuestion = await generateQuestion();
+      if (newQuestion) {
+        const { data, error } = await supabase
+          .from('quizzes')
+          .insert({
+            title: title,
+            question: newQuestion.question,
+            answers: newQuestion.answers,
+            correct_answer: newQuestion.correct_answer,
+            correct: 0,
+            incorrect: 0
+          })
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      console.log('Quiz saved to Supabase:', data);
-      setQuizData(data);
+        console.log('Quiz saved to Supabase:', data);
+        setQuizData(data);
+      }
+    } catch (error) {
+      console.error('Error creating quiz:', error);
+      setError('Failed to create quiz. Please try again.');
     }
   };
 
@@ -120,7 +125,24 @@ const TopBar = () => (
 
 const ContentSection = ({ title, setTitle, createQuiz, loading, error }) => (
   <div className="flex-1 flex flex-col items-center justify-start w-full px-4 mt-12">
-    {/* ... ContentSection code */}
+    <h1 className="text-3xl font-bold mb-8">Create a New Quiz</h1>
+    <input
+      type="text"
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
+      placeholder="Enter quiz title"
+      className="w-full max-w-md px-4 py-2 rounded-md bg-gray-800 text-white mb-4"
+    />
+    <button
+      onClick={createQuiz}
+      disabled={loading || !title.trim()}
+      className={`w-full max-w-md px-4 py-2 rounded-md ${
+        loading || !title.trim() ? 'bg-gray-600 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
+      } text-white transition-colors duration-200`}
+    >
+      {loading ? 'Creating...' : 'Create Quiz'}
+    </button>
+    {error && <p className="text-red-500 mt-4">{error}</p>}
   </div>
 );
 

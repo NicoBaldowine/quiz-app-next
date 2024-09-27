@@ -13,7 +13,67 @@ const QuizScreen = ({ question, answers, correct_answer, onNextQuestion, onAnswe
   });
   const timerRef = useRef(null);
 
-  // ... rest of the component logic
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setQuizState(prevState => ({
+        ...prevState,
+        timeLeft: prevState.timeLeft > 0 ? prevState.timeLeft - 0.1 : 0
+      }));
+    }, 100);
+
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (quizState.timeLeft <= 0) {
+      handleTimeUp();
+    }
+  }, [quizState.timeLeft]);
+
+  const handleAnswer = (selectedAnswer) => {
+    clearInterval(timerRef.current);
+    const isCorrect = selectedAnswer === correct_answer;
+    setQuizState(prevState => ({
+      ...prevState,
+      status: 'answered',
+      selectedAnswer,
+      result: isCorrect ? 'correct' : 'incorrect'
+    }));
+    onAnswerSubmit(isCorrect);
+  };
+
+  const handleTimeUp = () => {
+    clearInterval(timerRef.current);
+    setQuizState(prevState => ({
+      ...prevState,
+      status: 'answered',
+      result: "time's up"  // Make sure this matches exactly
+    }));
+    onAnswerSubmit(false);  // Treat time's up as an incorrect answer
+  };
+
+  const handleNextQuestion = () => {
+    onNextQuestion();
+    setQuizState({
+      status: 'active',
+      selectedAnswer: null,
+      result: '',
+      timeLeft: 10
+    });
+  };
+
+  if (quizState.status === 'answered') {
+    console.log("Rendering ResultScreen with result:", quizState.result);
+    return (
+      <ResultScreen
+        result={quizState.result}
+        correctAnswer={correct_answer}
+        onNextQuestion={handleNextQuestion}
+        quizId={quizId}
+        topic={topic}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
@@ -44,7 +104,7 @@ const TopBar = () => (
 const ProgressBar = ({ timeLeft }) => (
   <div className="w-full bg-gray-700 h-1">
     <div 
-      className="bg-purple-600 h-1 transition-all duration-1000 ease-linear"
+      className="bg-purple-600 h-1 transition-all duration-100 ease-linear"
       style={{ width: `${(timeLeft / 10) * 100}%` }}
     ></div>
   </div>
@@ -87,5 +147,5 @@ const AnswerButton = ({ answer, index, selectedAnswer, handleAnswer }) => {
   );
 };
 
-// ... rest of the file
+export default QuizScreen;
 

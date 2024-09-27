@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';  // Added useRef
 import Link from "next/link";
 import { Button } from "@nextui-org/react";
-import { Home, PlusCircle, User, MoreVertical, Play, Trash2 } from "lucide-react";
+import { Play, Trash2 } from "lucide-react";  // Removed unused imports
 import { supabase } from '../lib/supabaseClient';
 
 const HomeScreen = () => {
@@ -105,19 +105,12 @@ const QuizCard = ({ quiz, onDelete }) => {
   );
 };
 
-const ScoreTag = ({ icon: Icon, color, score }) => (
-  <span className={`bg-${color}-600 text-${color}-100 text-xs font-medium px-2 py-1 rounded-full flex items-center`}>
-    <Icon className="h-3 w-3 mr-1" />
-    {score}
-  </span>
-);
-
 const Navigation = () => (
   <nav className="bg-gray-800 fixed bottom-0 left-0 right-0 z-10">
     <div className="w-full px-4">
       <ul className="flex justify-around py-3">
         <NavItem href="/" icon={HomeIcon} label="Home" />
-        <NavItem href="/create" icon={PlusIcon} label="Create" />
+        <NavItem href="/create" icon={PlusIcon} label="Create" /> {/* Make sure this path is correct */}
         <NavItem href="/account" icon={UserIcon} label="Profile" />
       </ul>
     </div>
