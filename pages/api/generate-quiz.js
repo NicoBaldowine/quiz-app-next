@@ -2,6 +2,9 @@
 
 import axios from 'axios';
 
+let previousQuestions = [];
+let difficultyLevel = 1;
+
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { title } = req.body;
@@ -18,29 +21,41 @@ export default async function handler(req, res) {
           messages: [
             {
               role: 'system',
-              content: `Generate a quiz question based on the title: "${title}". Provide four answer choices labeled A) to D), and specify the correct answer by its option letter (A, B, C, or D). Output your response exactly in the following JSON format (without any additional text or explanations):
+              content: `Generate a unique and challenging quiz question based on the title: "${title}". 
+              Current difficulty level: ${difficultyLevel} (1-10 scale, where 10 is most difficult).
+              
+              Rules:
+              1. The question should be more difficult than previous questions.
+              2. Do not repeat any previously asked questions.
+              3. Provide four answer choices labeled A) to D).
+              4. Specify the correct answer by its option letter (A, B, C, or D).
+              
+              Previous questions: ${JSON.stringify(previousQuestions)}
+              
+              Output your response exactly in the following JSON format (without any additional text or explanations):
 
-{
-  "question": "Your question here",
-  "answers": {
-    "A": "First option",
-    "B": "Second option",
-    "C": "Third option",
-    "D": "Fourth option"
-  },
-  "correctAnswer": "Option letter (A, B, C, or D)"
-}
+              {
+                "question": "Your unique and challenging question here",
+                "answers": {
+                  "A": "First option",
+                  "B": "Second option",
+                  "C": "Third option",
+                  "D": "Fourth option"
+                },
+                "correctAnswer": "Option letter (A, B, C, or D)",
+                "difficulty": "Numeric difficulty level (${difficultyLevel}-10)"
+              }
 
-Ensure the JSON is properly formatted and does not include any extra characters or text.`,
+              Ensure the JSON is properly formatted and does not include any extra characters or text.`,
             },
           ],
-          max_tokens: 200,
+          max_tokens: 300,
           n: 1,
-          temperature: 0.7,
+          temperature: 0.8,
         },
         {
           headers: {
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // Correct reference without process.env prefix
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
             'Content-Type': 'application/json',
           },
         }
@@ -59,8 +74,15 @@ Ensure the JSON is properly formatted and does not include any extra characters 
         return res.status(500).json({ error: 'Failed to parse quiz data' });
       }
 
-      const { question, answers, correctAnswer: correctOptionLetter } = quizData;
+      const { question, answers, correctAnswer: correctOptionLetter, difficulty } = quizData;
       console.log('Parsed Quiz Data:', quizData);
+
+      // Update previous questions and difficulty level
+      previousQuestions.push(question);
+      if (previousQuestions.length > 10) {
+        previousQuestions.shift(); // Keep only the last 10 questions
+      }
+      difficultyLevel = Math.min(10, Math.max(difficultyLevel, parseInt(difficulty)));
 
       const optionsArray = ['A', 'B', 'C', 'D'];
       const answersArray = optionsArray.map((option) => answers[option]);
@@ -73,6 +95,7 @@ Ensure the JSON is properly formatted and does not include any extra characters 
         question,
         answers: answersArray,
         correctAnswer,
+        difficulty: difficultyLevel,
       });
     } catch (error) {
       console.error('Error generating quiz:', error);

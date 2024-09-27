@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
+import { supabase } from '../lib/supabaseClient';
 
-const ResultScreen = ({ result, correctAnswer, onRetry }) => {
+const ResultScreen = ({ result, correctAnswer, onRetry, quizId }) => {
   // Determine if the answer is correct or incorrect
   const isCorrect =
     result.toLowerCase() === "correct" || result.toLowerCase() === "correct!";
@@ -17,6 +18,39 @@ const ResultScreen = ({ result, correctAnswer, onRetry }) => {
 
   // Ensure that the correctAnswer is always shown
   const displayAnswer = correctAnswer || "N/A";
+
+  useEffect(() => {
+    console.log('Quiz ID:', quizId);
+    console.log('Result:', result);
+
+    const updateQuizScore = async () => {
+      const field = result.toLowerCase() === "correct!" ? 'correct' : 'incorrect';
+      
+      // First, get the current score
+      const { data, error: fetchError } = await supabase
+        .from('quizzes')
+        .select(field)
+        .eq('id', quizId)
+        .single();
+
+      if (fetchError) {
+        console.error("Error fetching quiz score:", fetchError);
+        return;
+      }
+
+      // Then, update the score
+      const { error: updateError } = await supabase
+        .from('quizzes')
+        .update({ [field]: (data[field] || 0) + 1 })
+        .eq('id', quizId);
+
+      if (updateError) {
+        console.error("Error updating quiz score:", updateError);
+      }
+    };
+
+    updateQuizScore();
+  }, [result, quizId]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
@@ -32,21 +66,23 @@ const ResultScreen = ({ result, correctAnswer, onRetry }) => {
       </div>
 
       {/* Content section */}
-      <div className="flex-1 flex flex-col items-center justify-start px-4 mt-12 w-full">
-        {/* Emoji */}
-        <div className="text-6xl mb-4">{emoji}</div>
+      <div className="flex-1 flex flex-col px-4">
+        <div className="flex-grow flex flex-col items-center justify-center">
+          {/* Emoji */}
+          <div className="text-6xl mb-4">{emoji}</div>
 
-        {/* Title */}
-        <h2 className="text-3xl font-bold text-center mb-2">{title}</h2>
+          {/* Title */}
+          <h2 className="text-3xl font-bold text-center mb-2">{title}</h2>
 
-        {/* Description */}
-        <p className="text-base text-gray-400 mb-10">{`The right answer was '${displayAnswer}'`}</p>
+          {/* Description */}
+          <p className="text-base text-gray-400 mb-10">{`The right answer was '${displayAnswer}'`}</p>
+        </div>
 
-        {/* Buttons */}
-        <div className="w-full max-w-lg space-y-4 px-4">
+        {/* Buttons at the bottom */}
+        <div className="w-full mb-4">
           <button
             onClick={onRetry}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-md mb-4" // Added margin-bottom here
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-md mb-4"
           >
             Do it again!
           </button>

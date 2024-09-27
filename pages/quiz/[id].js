@@ -2,34 +2,51 @@
 
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabaseClient';
 import QuizScreen from '../../components/QuizScreen'; // Adjust path if necessary
 
 const QuizPage = () => {
   const router = useRouter();
   const { id } = router.query; // Get the quiz ID from the URL
-  const [quizData, setQuizData] = useState(null);
+  const [quiz, setQuiz] = useState(null);
 
-  // Load quiz data from localStorage when the component is mounted
+  // Load quiz data from Supabase when the component is mounted
   useEffect(() => {
-    if (id !== undefined) {
-      const storedQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-      const selectedQuiz = storedQuizzes[id]; // Retrieve the quiz by its index
-      setQuizData(selectedQuiz);
+    if (id) {
+      fetchQuiz();
     }
   }, [id]);
 
+  const fetchQuiz = async () => {
+    const { data, error } = await supabase
+      .from('quizzes')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching quiz:", error);
+    } else {
+      setQuiz(data);
+    }
+  };
+
+  const handleRetry = async () => {
+    // Reset the quiz or generate a new one
+    // For now, we'll just refetch the same quiz
+    await fetchQuiz();
+  };
+
   // If no quiz data is found, show a loading or error message
-  if (!quizData) {
-    return <div style={{ color: '#fff', textAlign: 'center' }}>Loading...</div>;
-  }
+  if (!quiz) return <div>Loading...</div>;
 
   return (
     <QuizScreen
-      question={quizData.question}
-      answers={quizData.answers}
-      correctAnswer={quizData.correctAnswer}
-      title={quizData.title}
-      onRetry={() => router.push('/')} // Go back to home after retry
+      question={quiz.question}
+      answers={quiz.answers}
+      correctAnswer={quiz.correctAnswer}
+      onRetry={handleRetry}
+      title={quiz.title}
     />
   );
 };

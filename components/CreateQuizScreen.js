@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import QuizScreen from "./QuizScreen";
 import { X } from "lucide-react";
+import { supabase } from '../lib/supabaseClient';
 
 const CreateQuizScreen = () => {
   const [title, setTitle] = useState("");
@@ -12,8 +13,8 @@ const CreateQuizScreen = () => {
   const [error, setError] = useState(null);
 
   const createQuiz = async () => {
-    if (!title) {
-      alert("Please provide a quiz title.");
+    if (!title.trim()) {
+      setError("Please provide a quiz title.");
       return;
     }
 
@@ -22,10 +23,31 @@ const CreateQuizScreen = () => {
 
     try {
       const response = await axios.post("/api/generate-quiz", { title });
-      setQuizData(response.data);
+      const quizData = response.data;
+
+      // Store quiz in Supabase
+      const { data, error } = await supabase
+        .from('quizzes')
+        .insert([
+          { 
+            title: title, 
+            question: quizData.question, 
+            answers: quizData.answers,
+            correctAnswer: quizData.correctAnswer,
+            correct: 0,
+            incorrect: 0
+          }
+        ]);
+
+      if (error) {
+        console.error("Supabase error:", error);
+        throw new Error(error.message);
+      }
+
+      setQuizData(quizData);
     } catch (error) {
-      console.error("Error generating quiz:", error.response?.data || error.message);
-      setError("Failed to generate quiz. Please try again.");
+      console.error("Error generating quiz:", error.message);
+      setError(`Failed to generate quiz: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -33,10 +55,9 @@ const CreateQuizScreen = () => {
 
   const handleRetry = () => {
     setQuizData(null);
-    createQuiz(); // Call createQuiz to generate a new quiz based on the same title
+    createQuiz();
   };
 
-  // If quizData exists, render QuizScreen and hide CreateQuizScreen
   if (quizData) {
     return (
       <QuizScreen
@@ -51,46 +72,66 @@ const CreateQuizScreen = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-      {/* Topbar with X icon */}
-      <div className="w-full px-4 py-2 flex justify-end items-center border-b border-gray-800">
+      <TopBar />
+      <ContentSection
+        title={title}
+        setTitle={setTitle}
+        createQuiz={createQuiz}
+        loading={loading}
+        error={error}
+      />
+    </div>
+  );
+};
+
+const TopBar = () => (
+  <div className="w-full px-4 py-2 flex justify-end items-center border-b border-gray-800">
+    <button
+      onClick={() => window.history.back()}
+      className="text-white hover:bg-gray-800 h-10 w-10 flex items-center justify-center rounded-full"
+    >
+      <X className="h-6 w-6" />
+      <span className="sr-only">Close</span>
+    </button>
+  </div>
+);
+
+const ContentSection = ({ title, setTitle, createQuiz, loading, error }) => {
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  return (
+    <div className="flex-1 flex flex-col items-center justify-start w-full px-4 mt-12">
+      <h1 className="text-3xl font-bold text-center mb-6 w-full">
+        What would you like to learn today?
+      </h1>
+      <div className="w-full space-y-4">
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Type any topic..."
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full bg-gray-800 border-gray-700 text-white placeholder-gray-400 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+        />
         <button
-          onClick={() => window.history.back()}
-          className="text-white hover:bg-gray-800 h-10 w-10 flex items-center justify-center rounded-full"
+          onClick={createQuiz}
+          disabled={loading || !title.trim()}
+          className={`w-full py-3 rounded-md text-white transition-colors duration-200 ${
+            title.trim()
+              ? "bg-purple-600 hover:bg-purple-700"
+              : "bg-gray-600 cursor-not-allowed"
+          } focus:outline-none focus:ring-2 focus:ring-purple-600`}
         >
-          <X className="h-6 w-6" />
-          <span className="sr-only">Close</span>
+          {loading ? "Generating Quiz..." : "Create Quiz"}
         </button>
       </div>
-      
-      {/* Content section with full width and padding */}
-      <div className="flex-1 flex flex-col items-center justify-start px-4 mt-12 w-full">
-        <h1 className="text-3xl font-bold text-center mb-6 w-full px-4">
-          What would you like to learn today?
-        </h1>
-        <div className="w-full max-w-lg space-y-4 px-4"> 
-          {/* Full width input field with 16px padding */}
-          <input
-            type="text"
-            placeholder="Type for any topic..."
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-gray-800 border-gray-700 text-white placeholder-gray-400 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-          />
-          {/* Tailwind-styled purple button */}
-          <button
-            onClick={createQuiz}
-            disabled={loading || !title}
-            className={`w-full py-3 rounded-md text-white ${
-              title
-                ? "bg-purple-600 hover:bg-purple-700"
-                : "bg-gray-600 cursor-not-allowed"
-            } focus:outline-none focus:ring-2 focus:ring-purple-600`}
-          >
-            {loading ? "Generating Quiz..." : "Create Quiz"}
-          </button>
-        </div>
-        {error && <p className="text-red-500 mt-4">{error}</p>}
-      </div>
+      {error && <p className="text-red-500 mt-4 w-full">{error}</p>}
     </div>
   );
 };
