@@ -44,14 +44,16 @@ const HomeScreen = () => {
   return (
     <div className="flex flex-col min-h-screen pb-16 bg-gray-900 text-white">
       <main className="flex-1 w-full overflow-y-auto">
-        <h1 className="text-3xl font-bold p-6">Quizzes</h1>
-        <div className="grid grid-cols-2 gap-3 px-3">
+        {quizzes.length > 0 && <h1 className="text-3xl font-bold p-6">Quizzes</h1>}
+        <div className="h-[calc(100vh-4rem)]"> {/* Adjusted height */}
           {quizzes.length === 0 ? (
             <EmptyQuizState />
           ) : (
-            quizzes.map((quiz) => (
-              <QuizCard key={quiz.id} quiz={quiz} onDelete={deleteQuiz} />
-            ))
+            <div className="grid grid-cols-2 gap-3 px-3">
+              {quizzes.map((quiz) => (
+                <QuizCard key={quiz.id} quiz={quiz} onDelete={deleteQuiz} />
+              ))}
+            </div>
           )}
         </div>
       </main>
@@ -61,9 +63,17 @@ const HomeScreen = () => {
 };
 
 const EmptyQuizState = () => (
-  <div className="flex flex-col items-center justify-center h-64">
-    <div className="text-6xl mb-4">☔️</div>
-    <h3 className="text-lg">No quizzes created yet wey</h3>
+  <div className="flex flex-col items-center pt-12 px-4"> {/* Changed from justify-center to pt-12 */}
+    <div className="text-6xl mb-4">✨</div>
+    <h3 className="text-2xl font-bold mb-4">Create a Quiz on Any Topic</h3>
+    <p className="text-gray-400 mb-4 text-center max-w-md"> {/* Added text-center and max-w-md */}
+      Discover new knowledge, test your skills, and learn something new along the way.
+    </p>
+    <Link href="/create" passHref>
+      <Button className="bg-purple-600 hover:bg-purple-700 text-white font-normal py-2 px-4 rounded">
+        Start Now
+      </Button>
+    </Link>
   </div>
 );
 

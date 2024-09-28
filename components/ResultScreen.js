@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import Link from "next/link";
 import { X } from "lucide-react";
 
 const ResultScreen = ({ result, correctAnswer, onNextQuestion, quizId, topic }) => {
@@ -33,35 +32,25 @@ const ResultScreen = ({ result, correctAnswer, onNextQuestion, quizId, topic }) 
       </div>
 
       {/* Content section */}
-      <div className="flex-1 flex flex-col px-4">
-        <div className="flex-grow flex flex-col items-center justify-center">
-          {/* Emoji */}
-          <div className="text-6xl mb-4">{emoji}</div>
+      <div className="flex-1 flex flex-col items-center px-4 pt-12"> {/* Added pt-12 for 48px top spacing */}
+        {/* Emoji */}
+        <div className="text-6xl mb-4">{emoji}</div>
 
-          {/* Title */}
-          <h2 className="text-3xl font-bold text-center mb-2">{title}</h2>
+        {/* Title */}
+        <h2 className="text-3xl font-bold text-center mb-2">{title}</h2>
 
-          {/* Description */}
-          <p className="text-base text-gray-400 mb-10">
-            {isTimeUp ? "You ran out of time!" : `The correct answer was: ${correctAnswer}`}
-          </p>
-        </div>
+        {/* Description */}
+        <p className="text-base text-gray-400 mb-8 text-center max-w-md">
+          {isTimeUp ? "You ran out of time!" : `The correct answer was: ${correctAnswer}`}
+        </p>
 
-        {/* Buttons at the bottom */}
-        <div className="w-full mb-4">
-          <button
-            onClick={handleNextQuestion}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-md mb-4"
-          >
-            Next Question
-          </button>
-
-          <Link href="/" passHref>
-            <button className="w-full bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-md">
-              Go home
-            </button>
-          </Link>
-        </div>
+        {/* Next Question button */}
+        <button
+          onClick={handleNextQuestion}
+          className="bg-purple-600 hover:bg-purple-700 text-white font-normal py-2 px-4 rounded"
+        >
+          Next Question
+        </button>
       </div>
     </div>
   );
