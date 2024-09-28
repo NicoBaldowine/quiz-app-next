@@ -15,7 +15,6 @@ const CreateQuizScreen = () => {
   const router = useRouter();
 
   const generateQuestion = async () => {
-    setLoading(true);
     try {
       const response = await axios.post('/api/generate-quiz', { title });
       console.log('New question generated:', response.data);
@@ -24,48 +23,72 @@ const CreateQuizScreen = () => {
       console.error('Error generating question:', error);
       setError('Failed to generate new question. Please try again.');
       return null;
-    } finally {
-      setLoading(false);
     }
   };
 
+  const generateMultipleQuestions = async (count) => {
+    const questions = [];
+    for (let i = 0; i < count; i++) {
+      const question = await generateQuestion();
+      if (question) {
+        questions.push({
+          question: question.question,
+          answers: question.answers,
+          correct_answer: question.correct_answer
+        });
+      }
+    }
+    return questions; // Return the array directly, no need to stringify
+  };
+
   const createQuiz = async () => {
+    setLoading(true);
     try {
-      const newQuestion = await generateQuestion();
-      if (newQuestion) {
+      const questions = await generateMultipleQuestions(5); // Generate 5 questions
+      console.log('Generated questions:', questions);
+      if (questions.length > 0) {
         const { data, error } = await supabase
           .from('quizzes')
           .insert({
             title: title,
-            question: newQuestion.question,
-            answers: newQuestion.answers,
-            correct_answer: newQuestion.correct_answer,
+            questions: questions,
             correct: 0,
             incorrect: 0
           })
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase error:', error);
+          throw error;
+        }
 
         console.log('Quiz saved to Supabase:', data);
         setQuizData(data);
+      } else {
+        setError('Failed to generate questions. Please try again.');
       }
     } catch (error) {
       console.error('Error creating quiz:', error);
       setError('Failed to create quiz. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleNextQuestion = async () => {
-    const newQuestion = await generateQuestion();
-    if (newQuestion) {
-      setQuizData(prevData => ({
-        ...prevData,
-        question: newQuestion.question,
-        answers: newQuestion.answers,
-        correct_answer: newQuestion.correct_answer
-      }));
+  const handleNextQuestion = () => {
+    if (quizData && quizData.questions) {
+      const currentIndex = quizData.currentQuestionIndex || 0;
+      if (currentIndex < quizData.questions.length - 1) {
+        setQuizData(prevData => ({
+          ...prevData,
+          currentQuestionIndex: currentIndex + 1
+        }));
+      } else {
+        // Quiz finished
+        console.log('Quiz finished');
+        // Handle quiz completion (e.g., show results, redirect)
+      }
     }
   };
 
@@ -75,11 +98,12 @@ const CreateQuizScreen = () => {
   };
 
   if (quizData) {
+    const currentQuestionIndex = quizData.currentQuestionIndex || 0;
+    const currentQuestion = quizData.questions[currentQuestionIndex];
     return (
       <QuizScreen
-        question={quizData.question}
-        answers={quizData.answers}
-        correct_answer={quizData.correct_answer}
+        questions={quizData.questions}
+        currentQuestionIndex={currentQuestionIndex}
         onRetry={handleRetry}
         onNextQuestion={handleNextQuestion}
         onAnswerSubmit={(isCorrect) => {

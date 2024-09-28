@@ -1,86 +1,58 @@
-// pages/quiz/[id].js
-
 import { useRouter } from 'next/router';
-import { useEffect, useState, useCallback } from 'react';
-import dynamic from 'next/dynamic';
-import { supabase } from '../../lib/supabaseClient';  // Note the change here
+import { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabaseClient';
+import QuizScreen from '../../components/QuizScreen';
 
-// Dynamically import QuizScreen with ssr disabled
-const QuizScreen = dynamic(() => import('../../components/QuizScreen'), { ssr: false });
-
-const QuizPage = () => {
+export default function QuizPage() {
   const router = useRouter();
   const { id } = router.query;
   const [quizData, setQuizData] = useState(null);
-  const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-  const fetchQuizData = useCallback(async () => {
+  useEffect(() => {
     if (id) {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('quizzes')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (error) throw error;
-        setQuizData(data);
-        setCurrentQuestion({
-          question: data.question,
-          answers: data.answers,
-          correct_answer: data.correct_answer
-        });
-      } catch (error) {
-        console.error("Error fetching quiz:", error);
-      } finally {
-        setIsLoading(false);
-      }
+      fetchQuizData(id);
     }
   }, [id]);
 
-  useEffect(() => {
-    fetchQuizData();
-  }, [fetchQuizData]);
+  const fetchQuizData = async (quizId) => {
+    const { data, error } = await supabase
+      .from('quizzes')
+      .select('*')
+      .eq('id', quizId)
+      .single();
 
-  const handleNextQuestion = useCallback(async () => {
-    // Here you would typically generate a new question
-    // For now, let's just fetch the same question again
-    await fetchQuizData();
-  }, [fetchQuizData]);
-
-  const handleAnswerSubmission = useCallback(async (isCorrect) => {
-    if (!quizData) return;
-
-    const field = isCorrect ? 'correct' : 'incorrect';
-    try {
-      const { error } = await supabase
-        .from('quizzes')
-        .update({ [field]: supabase.rpc('increment', { x: 1 }) })
-        .eq('id', id);
-
-      if (error) throw error;
-    } catch (error) {
-      console.error("Error updating quiz score:", error);
+    if (error) {
+      console.error('Error fetching quiz:', error);
+    } else {
+      setQuizData(data);
     }
-  }, [quizData, id]);
+  };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (!quizData || !currentQuestion) return <div>Quiz not found</div>;
+  const handleNextQuestion = () => {
+    setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+  };
+
+  if (!quizData) return <div>Loading...</div>;
 
   return (
     <QuizScreen
-      question={currentQuestion.question}
-      answers={currentQuestion.answers}
-      correct_answer={currentQuestion.correct_answer}
+      questions={quizData.questions}
+      currentQuestionIndex={currentQuestionIndex}
+      onRetry={() => setCurrentQuestionIndex(0)}
       onNextQuestion={handleNextQuestion}
-      onAnswerSubmit={handleAnswerSubmission}
-      quizId={id}
+      onAnswerSubmit={(isCorrect) => {
+        // Update quiz score in Supabase
+        supabase
+          .from('quizzes')
+          .update({
+            [isCorrect ? 'correct' : 'incorrect']: supabase.rpc('increment', { x: 1 })
+          })
+          .eq('id', quizData.id);
+      }}
+      quizId={quizData.id}
       topic={quizData.title}
     />
   );
-};
-
-export default QuizPage;
+}
 

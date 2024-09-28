@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import Link from "next/link";
 import { X } from "lucide-react";
-import { supabase } from '../lib/supabaseClient';
 
 const ResultScreen = ({ result, correctAnswer, onNextQuestion, quizId, topic }) => {
   const isCorrect = result.toLowerCase() === "correct" || result.toLowerCase() === "correct!";
@@ -12,48 +11,9 @@ const ResultScreen = ({ result, correctAnswer, onNextQuestion, quizId, topic }) 
   const emoji = isCorrect ? "✨" : isTimeUp ? "⌛️" : "☔️";
   const title = isCorrect ? "Correct answer" : isTimeUp ? "Time's up!" : "Wrong answer";
 
-  useEffect(() => {
-    console.log('Quiz ID:', quizId);
-    console.log('Result:', result);
-    console.log('Topic:', topic);
-
-    const updateQuizScore = async () => {
-      const field = isCorrect ? 'correct' : 'incorrect';
-      
-      // First, get the current score
-      const { data, error: fetchError } = await supabase
-        .from('quizzes')
-        .select(field)
-        .eq('id', quizId)
-        .single();
-
-      if (fetchError) {
-        console.error("Error fetching quiz score:", fetchError);
-        return;
-      }
-
-      // Then, update the score
-      const { error: updateError } = await supabase
-        .from('quizzes')
-        .update({ [field]: (data[field] || 0) + 1 })
-        .eq('id', quizId);
-
-      if (updateError) {
-        console.error("Error updating quiz score:", updateError);
-      }
-    };
-
-    // Only update the score if it's not a "Time's up" scenario
-    if (!isTimeUp) {
-      updateQuizScore();
-    }
-  }, [quizId, result, isCorrect, isTimeUp, topic]);
-
-  const handleNextQuestion = async () => {
-    console.log("Next Question button clicked");
+  const handleNextQuestion = () => {
     if (typeof onNextQuestion === 'function') {
-      console.log("Calling onNextQuestion function");
-      await onNextQuestion();
+      onNextQuestion();
     } else {
       console.error("onNextQuestion is not a function", onNextQuestion);
     }

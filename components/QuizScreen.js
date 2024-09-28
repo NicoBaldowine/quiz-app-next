@@ -4,25 +4,36 @@ import React, { useState, useEffect, useRef } from "react";
 import ResultScreen from "./ResultScreen";
 import { X } from "lucide-react";
 
-const QuizScreen = ({ question, answers, correct_answer, onNextQuestion, onAnswerSubmit, quizId, topic }) => {
+const QuizScreen = ({ questions, currentQuestionIndex, onRetry, onNextQuestion, onAnswerSubmit, quizId, topic }) => {
   const [quizState, setQuizState] = useState({
     status: 'active',
     selectedAnswer: null,
     result: '',
     timeLeft: 10
   });
+
   const timerRef = useRef(null);
 
   useEffect(() => {
-    timerRef.current = setInterval(() => {
+    if (questions && questions.length > 0) {
       setQuizState(prevState => ({
         ...prevState,
-        timeLeft: prevState.timeLeft > 0 ? prevState.timeLeft - 0.1 : 0
+        status: 'active',
+        selectedAnswer: null,
+        result: '',
+        timeLeft: 10
       }));
-    }, 100);
 
-    return () => clearInterval(timerRef.current);
-  }, []);
+      timerRef.current = setInterval(() => {
+        setQuizState(prevState => ({
+          ...prevState,
+          timeLeft: prevState.timeLeft > 0 ? prevState.timeLeft - 0.1 : 0
+        }));
+      }, 100);
+
+      return () => clearInterval(timerRef.current);
+    }
+  }, [questions, currentQuestionIndex]);
 
   useEffect(() => {
     if (quizState.timeLeft <= 0) {
@@ -30,9 +41,19 @@ const QuizScreen = ({ question, answers, correct_answer, onNextQuestion, onAnswe
     }
   }, [quizState.timeLeft]);
 
+  if (!questions || questions.length === 0 || currentQuestionIndex === undefined) {
+    return <div>Loading questions...</div>;
+  }
+
+  const currentQuestion = questions[currentQuestionIndex];
+
+  if (!currentQuestion) {
+    return <div>No more questions available.</div>;
+  }
+
   const handleAnswer = (selectedAnswer) => {
     clearInterval(timerRef.current);
-    const isCorrect = selectedAnswer === correct_answer;
+    const isCorrect = selectedAnswer === currentQuestion.correct_answer;
     setQuizState(prevState => ({
       ...prevState,
       status: 'answered',
@@ -47,19 +68,9 @@ const QuizScreen = ({ question, answers, correct_answer, onNextQuestion, onAnswe
     setQuizState(prevState => ({
       ...prevState,
       status: 'answered',
-      result: "time's up"  // Make sure this matches exactly
+      result: "time's up"
     }));
-    onAnswerSubmit(false);  // Treat time's up as an incorrect answer
-  };
-
-  const handleNextQuestion = () => {
-    onNextQuestion();
-    setQuizState({
-      status: 'active',
-      selectedAnswer: null,
-      result: '',
-      timeLeft: 10
-    });
+    onAnswerSubmit(false);
   };
 
   if (quizState.status === 'answered') {
@@ -67,8 +78,8 @@ const QuizScreen = ({ question, answers, correct_answer, onNextQuestion, onAnswe
     return (
       <ResultScreen
         result={quizState.result}
-        correctAnswer={correct_answer}
-        onNextQuestion={handleNextQuestion}
+        correctAnswer={currentQuestion.correct_answer}
+        onNextQuestion={onNextQuestion}
         quizId={quizId}
         topic={topic}
       />
@@ -80,8 +91,8 @@ const QuizScreen = ({ question, answers, correct_answer, onNextQuestion, onAnswe
       <TopBar />
       <ProgressBar timeLeft={quizState.timeLeft} />
       <QuizContent 
-        question={question}
-        answers={answers}
+        question={currentQuestion.question}
+        answers={currentQuestion.answers}
         selectedAnswer={quizState.selectedAnswer}
         handleAnswer={handleAnswer}
       />
