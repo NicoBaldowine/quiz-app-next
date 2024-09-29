@@ -4,36 +4,23 @@ import React, { useState, useEffect, useRef } from "react";
 import ResultScreen from "./ResultScreen";
 import { X } from "lucide-react";
 
-const QuizScreen = ({ questions, currentQuestionIndex, onRetry, onNextQuestion, onAnswerSubmit, quizId, topic }) => {
+const QuizScreen = ({ questions, onRetry, onAnswerSubmit, quizId, topic }) => {
   const [quizState, setQuizState] = useState({
     status: 'active',
     selectedAnswer: null,
     result: '',
-    timeLeft: 10
+    timeLeft: 10,
+    currentQuestionIndex: 0,
+    correctAnswers: 0,
   });
 
   const timerRef = useRef(null);
 
   useEffect(() => {
     if (questions && questions.length > 0) {
-      setQuizState(prevState => ({
-        ...prevState,
-        status: 'active',
-        selectedAnswer: null,
-        result: '',
-        timeLeft: 10
-      }));
-
-      timerRef.current = setInterval(() => {
-        setQuizState(prevState => ({
-          ...prevState,
-          timeLeft: prevState.timeLeft > 0 ? prevState.timeLeft - 0.1 : 0
-        }));
-      }, 100);
-
-      return () => clearInterval(timerRef.current);
+      resetQuiz();
     }
-  }, [questions, currentQuestionIndex]);
+  }, [questions]);
 
   useEffect(() => {
     if (quizState.timeLeft <= 0) {
@@ -41,11 +28,33 @@ const QuizScreen = ({ questions, currentQuestionIndex, onRetry, onNextQuestion, 
     }
   }, [quizState.timeLeft]);
 
-  if (!questions || questions.length === 0 || currentQuestionIndex === undefined) {
+  const resetQuiz = () => {
+    setQuizState({
+      status: 'active',
+      selectedAnswer: null,
+      result: '',
+      timeLeft: 10,
+      currentQuestionIndex: 0,
+      correctAnswers: 0,
+    });
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    timerRef.current = setInterval(() => {
+      setQuizState(prevState => ({
+        ...prevState,
+        timeLeft: prevState.timeLeft > 0 ? prevState.timeLeft - 0.1 : 0
+      }));
+    }, 100);
+  };
+
+  if (!questions || questions.length === 0) {
     return <div>Loading questions...</div>;
   }
 
-  const currentQuestion = questions[currentQuestionIndex];
+  const currentQuestion = questions[quizState.currentQuestionIndex];
 
   if (!currentQuestion) {
     return <div>No more questions available.</div>;
@@ -58,7 +67,8 @@ const QuizScreen = ({ questions, currentQuestionIndex, onRetry, onNextQuestion, 
       ...prevState,
       status: 'answered',
       selectedAnswer,
-      result: isCorrect ? 'correct' : 'incorrect'
+      result: isCorrect ? 'correct' : 'incorrect',
+      correctAnswers: isCorrect ? prevState.correctAnswers + 1 : prevState.correctAnswers
     }));
     onAnswerSubmit(isCorrect);
   };
@@ -73,15 +83,46 @@ const QuizScreen = ({ questions, currentQuestionIndex, onRetry, onNextQuestion, 
     onAnswerSubmit(false);
   };
 
+  const handleNextQuestion = () => {
+    if (quizState.currentQuestionIndex < questions.length - 1) {
+      setQuizState(prevState => ({
+        ...prevState,
+        currentQuestionIndex: prevState.currentQuestionIndex + 1,
+        status: 'active',
+        selectedAnswer: null,
+        result: '',
+        timeLeft: 10
+      }));
+    } else {
+      // Quiz finished
+      setQuizState(prevState => ({
+        ...prevState,
+        status: 'finished'
+      }));
+    }
+  };
+
   if (quizState.status === 'answered') {
-    console.log("Rendering ResultScreen with result:", quizState.result);
     return (
       <ResultScreen
         result={quizState.result}
         correctAnswer={currentQuestion.correct_answer}
-        onNextQuestion={onNextQuestion}
+        onNextQuestion={handleNextQuestion}
         quizId={quizId}
         topic={topic}
+        isLastQuestion={quizState.currentQuestionIndex === questions.length - 1}
+      />
+    );
+  }
+
+  if (quizState.status === 'finished') {
+    const passed = quizState.correctAnswers >= 4;
+    return (
+      <FinalStatusScreen
+        passed={passed}
+        correctAnswers={quizState.correctAnswers}
+        totalQuestions={questions.length}
+        onRetry={resetQuiz}
       />
     );
   }
@@ -157,6 +198,29 @@ const AnswerButton = ({ answer, index, selectedAnswer, handleAnswer }) => {
     </button>
   );
 };
+
+const FinalStatusScreen = ({ passed, correctAnswers, totalQuestions, onRetry }) => (
+  <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+    <TopBar />
+    <div className="flex-1 flex flex-col items-center px-4 pt-12"> {/* Added pt-12 for top padding */}
+      <div className="text-4xl mb-4 w-8 h-8 flex items-center justify-center">
+        {passed ? "🎉" : "😢"}
+      </div>
+      <h2 className="text-2xl font-bold text-center mb-2">
+        {passed ? "Congratulations!" : "Better luck next time!"}
+      </h2>
+      <p className="text-base text-gray-400 mb-8 text-center max-w-md">
+        You got {correctAnswers} out of {totalQuestions} questions correct.
+      </p>
+      <button
+        onClick={onRetry}
+        className="bg-purple-600 hover:bg-purple-700 text-white font-normal py-2 px-4 rounded"
+      >
+        Try Again
+      </button>
+    </div>
+  </div>
+);
 
 export default QuizScreen;
 
