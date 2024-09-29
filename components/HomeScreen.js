@@ -3,8 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react';  // Added useRef
 import Link from "next/link";
 import { Button } from "@nextui-org/react";
-import { Play, Trash2 } from "lucide-react";  // Removed unused imports
+import { Play, Trash2, MoreVertical, PlayCircle } from "lucide-react";  // Import the MoreVertical icon
 import { supabase } from '../lib/supabaseClient';
+import { useRouter } from 'next/router';
 
 const HomeScreen = () => {
   const [quizzes, setQuizzes] = useState([]);
@@ -57,7 +58,7 @@ const HomeScreen = () => {
           ) : (
             <div className="grid grid-cols-2 gap-3 px-3">
               {quizzes.map((quiz) => (
-                <QuizCard key={quiz.id} quiz={quiz} onDelete={deleteQuiz} />
+                <QuizCard key={quiz.id} quiz={quiz} onDelete={deleteQuiz} onPlay={() => console.log("Play quiz", quiz.id)} />
               ))}
             </div>
           )}
@@ -100,11 +101,14 @@ const EmptyQuizState = () => (
 
 const QuizCard = ({ quiz, onDelete }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const menuButtonRef = useRef(null);
   const menuRef = useRef(null);
+  const router = useRouter();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+      if (menuRef.current && !menuRef.current.contains(event.target) && !menuButtonRef.current.contains(event.target)) {
         setShowMenu(false);
       }
     };
@@ -115,22 +119,74 @@ const QuizCard = ({ quiz, onDelete }) => {
     };
   }, []);
 
+  const playQuiz = () => {
+    router.push(`/quiz/${quiz.id}`);
+  };
+
+  const handleMenuClick = () => {
+    if (menuButtonRef.current) {
+      const rect = menuButtonRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+      });
+    }
+    setShowMenu(!showMenu);
+  };
+
   return (
-    <div className="bg-gray-800 p-4 rounded-lg">
-      <h3 className="text-lg font-semibold mb-2">{quiz.title}</h3>
-      <div className="flex justify-between items-center">
-        <Button
-          onClick={() => onDelete(quiz.id)}
-          className="text-white hover:text-gray-200"
-        >
-          <Trash2 size={18} />
-        </Button>
-        <Link href={`/quiz/${quiz.id}`} passHref>
-          <Button className="bg-transparent hover:bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-2">
-            Play
-          </Button>
-        </Link>
+    <div className="bg-gray-800 rounded-lg overflow-hidden flex flex-col p-4">
+      <div className="mb-6"> {/* Increased margin-bottom */}
+        <p className="text-xs font-semibold text-gray-400 mb-2">LEVEL 1</p> {/* Increased margin-bottom */}
+        <h3 className="text-lg font-semibold">{quiz.title}</h3>
       </div>
+      <div className="flex justify-between items-center mt-auto space-x-2">
+        <button
+          ref={menuButtonRef}
+          onClick={handleMenuClick}
+          className="bg-transparent hover:bg-gray-700 text-white font-semibold p-2 text-sm border border-gray-600 rounded transition-colors duration-200 flex items-center justify-center w-10 h-9" // Adjusted height
+        >
+          <MoreVertical size={18} />
+        </button>
+        <button
+          onClick={playQuiz}
+          className="bg-transparent hover:bg-gray-700 text-white font-semibold py-2 px-4 text-sm border border-gray-600 rounded transition-colors duration-200 flex-1"
+        >
+          Play Again
+        </button>
+      </div>
+      {showMenu && (
+        <div 
+          ref={menuRef}
+          style={{
+            position: 'fixed',
+            top: `${menuPosition.top}px`,
+            left: `${menuPosition.left}px`,
+          }}
+          className="w-48 bg-gray-700 rounded-md shadow-lg z-50"
+        >
+          <button
+            onClick={() => {
+              playQuiz();
+              setShowMenu(false);
+            }}
+            className="flex items-center w-full px-4 py-2 text-sm text-white hover:bg-gray-600"
+          >
+            <Play size={18} className="mr-2" />
+            Play Quiz
+          </button>
+          <button
+            onClick={() => {
+              onDelete(quiz.id);
+              setShowMenu(false);
+            }}
+            className="flex items-center w-full px-4 py-2 text-sm text-white hover:bg-gray-600"
+          >
+            <Trash2 size={18} className="mr-2" />
+            Delete
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -182,17 +238,3 @@ const UserIcon = (props) => (
 );
 
 export default HomeScreen;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
