@@ -148,8 +148,8 @@ const TopBar = () => (
 );
 
 const ContentSection = ({ title, setTitle, createQuiz, loading, error }) => (
-  <div className="flex-1 flex flex-col items-center justify-start w-full px-4 mt-12">
-    <h1 className="text-3xl font-bold mb-8">Create a New Quiz</h1>
+  <div className="flex-1 flex flex-col items-center justify-start w-full px-4 mt-8">
+    <h1 className="text-2xl font-bold mb-8 font-inter">Create a New Quiz</h1>
     <input
       type="text"
       value={title}

@@ -32,12 +32,12 @@ const ResultScreen = ({ result, correctAnswer, onNextQuestion, quizId, topic }) 
       </div>
 
       {/* Content section */}
-      <div className="flex-1 flex flex-col items-center px-4 pt-12"> {/* Added pt-12 for 48px top spacing */}
+      <div className="flex-1 flex flex-col items-center px-4 pt-12">
         {/* Emoji */}
-        <div className="text-6xl mb-4">{emoji}</div>
+        <div className="text-3xl mb-4 w-8 h-8 flex items-center justify-center">{emoji}</div>
 
         {/* Title */}
-        <h2 className="text-3xl font-bold text-center mb-2">{title}</h2>
+        <h2 className="text-2xl font-bold text-center mb-2">{title}</h2>
 
         {/* Description */}
         <p className="text-base text-gray-400 mb-8 text-center max-w-md">

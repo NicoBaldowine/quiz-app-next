@@ -115,15 +115,15 @@ const TopBar = () => (
 const ProgressBar = ({ timeLeft }) => (
   <div className="w-full bg-gray-700 h-1">
     <div 
-      className="bg-purple-600 h-1 transition-all duration-100 ease-linear"
-      style={{ width: `${(timeLeft / 10) * 100}%` }}
+      className="bg-purple-600 h-1 transition-all duration-100 ease-linear origin-left"
+      style={{ width: `${100 - (timeLeft / 10) * 100}%` }}
     ></div>
   </div>
 );
 
 const QuizContent = ({ question, answers, selectedAnswer, handleAnswer }) => (
-  <div className="flex-1 flex flex-col px-4 mt-12">
-    <h2 className="text-3xl font-bold text-center mb-6">{question}</h2>
+  <div className="flex-1 flex flex-col px-4 mt-6"> {/* Changed mt-4 to mt-6 */}
+    <h2 className="text-2xl font-bold text-center mb-6">{question}</h2>
     <div className="w-full space-y-4">
       {answers.map((answer, index) => (
         <AnswerButton

@@ -8,8 +8,10 @@ import { supabase } from '../lib/supabaseClient';
 
 const HomeScreen = () => {
   const [quizzes, setQuizzes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const loadQuizzes = async () => {
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('quizzes')
@@ -20,6 +22,8 @@ const HomeScreen = () => {
       setQuizzes(data);
     } catch (error) {
       console.error("Error loading quizzes:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,9 +48,11 @@ const HomeScreen = () => {
   return (
     <div className="flex flex-col min-h-screen pb-16 bg-gray-900 text-white">
       <main className="flex-1 w-full overflow-y-auto">
-        {quizzes.length > 0 && <h1 className="text-3xl font-bold p-6">Quizzes</h1>}
+        {(quizzes.length > 0 || loading) && <h1 className="text-3xl font-bold p-6">Quizzes</h1>}
         <div className="h-[calc(100vh-4rem)]"> {/* Adjusted height */}
-          {quizzes.length === 0 ? (
+          {loading ? (
+            <SkeletonLoader />
+          ) : quizzes.length === 0 ? (
             <EmptyQuizState />
           ) : (
             <div className="grid grid-cols-2 gap-3 px-3">
@@ -62,11 +68,26 @@ const HomeScreen = () => {
   );
 };
 
+const SkeletonLoader = () => (
+  <div className="grid grid-cols-2 gap-3 px-3">
+    {[...Array(4)].map((_, index) => (
+      <div key={index} className="bg-gray-800 p-4 rounded-lg animate-pulse">
+        <div className="h-5 bg-gray-700 rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
+        <div className="flex justify-between items-center">
+          <div className="h-8 w-8 bg-gray-700 rounded"></div>
+          <div className="h-8 w-20 bg-gray-700 rounded"></div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 const EmptyQuizState = () => (
-  <div className="flex flex-col items-center pt-12 px-4"> {/* Changed from justify-center to pt-12 */}
-    <div className="text-6xl mb-4">✨</div>
+  <div className="flex flex-col items-center pt-12 px-4">
+    <div className="text-4xl mb-4 w-8 h-8 flex items-center justify-center">✨</div>
     <h3 className="text-2xl font-bold mb-4">Create a Quiz on Any Topic</h3>
-    <p className="text-gray-400 mb-4 text-center max-w-md"> {/* Added text-center and max-w-md */}
+    <p className="text-gray-400 mb-12 text-center max-w-md"> {/* Changed mb-4 to mb-12 */}
       Discover new knowledge, test your skills, and learn something new along the way.
     </p>
     <Link href="/create" passHref>
