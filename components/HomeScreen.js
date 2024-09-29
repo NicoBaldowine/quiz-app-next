@@ -1,15 +1,57 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';  // Added useRef
+import React, { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { Button } from "@nextui-org/react";
-import { Play, Trash2, MoreVertical, PlayCircle } from "lucide-react";  // Import the MoreVertical icon
+import { Play, Trash2, MoreVertical } from "lucide-react";
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
+import AuthScreen from './AuthScreen';
+
+// Define a set of vibrant colors
+const cardColors = [
+  'bg-pink-500', 'bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 
+  'bg-teal-500', 'bg-green-500', 'bg-yellow-500', 'bg-orange-500', 
+  'bg-red-500', 'bg-rose-500'
+];
+
+// Function to get a color based on quiz ID
+const getColorForQuiz = (quizId) => {
+  let colorSeed;
+  if (typeof quizId === 'string') {
+    colorSeed = quizId;
+  } else if (typeof quizId === 'number') {
+    colorSeed = quizId.toString();
+  } else if (quizId && typeof quizId === 'object' && 'id' in quizId) {
+    colorSeed = quizId.id.toString();
+  } else {
+    // Fallback to a random color if quizId is not as expected
+    return cardColors[Math.floor(Math.random() * cardColors.length)];
+  }
+  
+  const colorIndex = colorSeed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % cardColors.length;
+  return cardColors[colorIndex];
+};
 
 const HomeScreen = () => {
+  const [session, setSession] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) loadQuizzes();
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) loadQuizzes();
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const loadQuizzes = async () => {
     setLoading(true);
@@ -28,10 +70,6 @@ const HomeScreen = () => {
     }
   };
 
-  useEffect(() => {
-    loadQuizzes();
-  }, []);
-
   const deleteQuiz = async (id) => {
     try {
       const { error } = await supabase
@@ -46,11 +84,15 @@ const HomeScreen = () => {
     }
   };
 
+  if (!session) {
+    return <AuthScreen />;
+  }
+
   return (
     <div className="flex flex-col min-h-screen pb-16 bg-gray-900 text-white">
       <main className="flex-1 w-full overflow-y-auto">
         {(quizzes.length > 0 || loading) && <h1 className="text-3xl font-bold p-6">Quizzes</h1>}
-        <div className="h-[calc(100vh-4rem)]"> {/* Adjusted height */}
+        <div className="h-[calc(100vh-4rem)]">
           {loading ? (
             <SkeletonLoader />
           ) : quizzes.length === 0 ? (
@@ -58,7 +100,7 @@ const HomeScreen = () => {
           ) : (
             <div className="grid grid-cols-2 gap-3 px-3">
               {quizzes.map((quiz) => (
-                <QuizCard key={quiz.id} quiz={quiz} onDelete={deleteQuiz} onPlay={() => console.log("Play quiz", quiz.id)} />
+                <QuizCard key={quiz.id} quiz={quiz} onDelete={deleteQuiz} onPlay={() => router.push(`/quiz/${quiz.id}`)} />
               ))}
             </div>
           )}
@@ -106,6 +148,8 @@ const QuizCard = ({ quiz, onDelete }) => {
   const menuRef = useRef(null);
   const router = useRouter();
 
+  const cardColor = getColorForQuiz(quiz.id);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target) && !menuButtonRef.current.contains(event.target)) {
@@ -127,7 +171,7 @@ const QuizCard = ({ quiz, onDelete }) => {
     if (menuButtonRef.current) {
       const rect = menuButtonRef.current.getBoundingClientRect();
       setMenuPosition({
-        top: rect.bottom + window.scrollY + 8, // Added 8px of spacing
+        top: rect.bottom + window.scrollY + 8,
         left: rect.left + window.scrollX,
       });
     }
@@ -135,22 +179,22 @@ const QuizCard = ({ quiz, onDelete }) => {
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg overflow-hidden flex flex-col p-4">
+    <div className={`${cardColor} rounded-lg overflow-hidden flex flex-col p-4 shadow-lg`}>
       <div className="mb-6">
-        <p className="text-xs font-semibold text-gray-400 mb-2">LEVEL 1</p>
-        <h3 className="text-lg font-semibold">{quiz.title}</h3>
+        <p className="text-xs font-semibold text-gray-800 mb-2 opacity-60">LEVEL 1</p>
+        <h3 className="text-lg font-semibold text-gray-900">{quiz.title}</h3>
       </div>
       <div className="flex justify-between items-center mt-auto space-x-2">
         <button
           ref={menuButtonRef}
           onClick={handleMenuClick}
-          className="bg-transparent hover:bg-gray-700 text-white font-semibold p-2 text-sm border border-gray-600 rounded transition-colors duration-200 flex items-center justify-center w-10 h-9"
+          className="bg-gray-800 bg-opacity-15 hover:bg-opacity-25 text-gray-900 font-semibold p-2 text-sm rounded transition-colors duration-200 flex items-center justify-center w-10 h-9"
         >
           <MoreVertical size={18} />
         </button>
         <button
           onClick={playQuiz}
-          className="bg-transparent hover:bg-gray-700 text-white font-semibold py-2 px-4 text-sm border border-gray-600 rounded transition-colors duration-200 flex-1"
+          className="bg-gray-800 bg-opacity-15 hover:bg-opacity-25 text-gray-900 font-semibold py-2 px-4 text-sm rounded transition-colors duration-200 flex-1"
         >
           Play
         </button>
@@ -163,14 +207,14 @@ const QuizCard = ({ quiz, onDelete }) => {
             top: `${menuPosition.top}px`,
             left: `${menuPosition.left}px`,
           }}
-          className="w-48 bg-gray-700 rounded-md shadow-lg z-50"
+          className="w-48 bg-white rounded-md shadow-lg z-50"
         >
           <button
             onClick={() => {
               playQuiz();
               setShowMenu(false);
             }}
-            className="flex items-center w-full px-4 py-2 text-sm text-white hover:bg-gray-600"
+            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
           >
             <Play size={18} className="mr-2" />
             Play Quiz
@@ -180,7 +224,7 @@ const QuizCard = ({ quiz, onDelete }) => {
               onDelete(quiz.id);
               setShowMenu(false);
             }}
-            className="flex items-center w-full px-4 py-2 text-sm text-white hover:bg-gray-600"
+            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
           >
             <Trash2 size={18} className="mr-2" />
             Delete
