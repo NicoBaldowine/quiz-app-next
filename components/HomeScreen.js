@@ -127,7 +127,7 @@ const QuizCard = ({ quiz, onDelete }) => {
     if (menuButtonRef.current) {
       const rect = menuButtonRef.current.getBoundingClientRect();
       setMenuPosition({
-        top: rect.bottom + window.scrollY,
+        top: rect.bottom + window.scrollY + 8, // Added 8px of spacing
         left: rect.left + window.scrollX,
       });
     }
@@ -136,15 +136,15 @@ const QuizCard = ({ quiz, onDelete }) => {
 
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden flex flex-col p-4">
-      <div className="mb-6"> {/* Increased margin-bottom */}
-        <p className="text-xs font-semibold text-gray-400 mb-2">LEVEL 1</p> {/* Increased margin-bottom */}
+      <div className="mb-6">
+        <p className="text-xs font-semibold text-gray-400 mb-2">LEVEL 1</p>
         <h3 className="text-lg font-semibold">{quiz.title}</h3>
       </div>
       <div className="flex justify-between items-center mt-auto space-x-2">
         <button
           ref={menuButtonRef}
           onClick={handleMenuClick}
-          className="bg-transparent hover:bg-gray-700 text-white font-semibold p-2 text-sm border border-gray-600 rounded transition-colors duration-200 flex items-center justify-center w-10 h-9" // Adjusted height
+          className="bg-transparent hover:bg-gray-700 text-white font-semibold p-2 text-sm border border-gray-600 rounded transition-colors duration-200 flex items-center justify-center w-10 h-9"
         >
           <MoreVertical size={18} />
         </button>
@@ -152,7 +152,7 @@ const QuizCard = ({ quiz, onDelete }) => {
           onClick={playQuiz}
           className="bg-transparent hover:bg-gray-700 text-white font-semibold py-2 px-4 text-sm border border-gray-600 rounded transition-colors duration-200 flex-1"
         >
-          Play Again
+          Play
         </button>
       </div>
       {showMenu && (
