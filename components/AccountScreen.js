@@ -26,7 +26,9 @@ const AccountScreen = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       {/* Navbar */}
-      <div className="w-full px-4 py-2 flex justify-end items-center border-b border-gray-800">
+      <div className="w-full px-4 py-2 flex justify-between items-center border-b border-gray-800">
+        <div className="w-10"></div> {/* Spacer to balance the layout */}
+        <h1 className="text-xl font-bold">Account</h1>
         <button
           onClick={() => router.back()}
           className="text-white hover:bg-gray-800 h-10 w-10 flex items-center justify-center rounded-full"
@@ -36,11 +38,8 @@ const AccountScreen = () => {
         </button>
       </div>
 
-      {/* Title */}
-      <h1 className="text-3xl font-bold px-4 mt-12 mb-6">Account</h1>
-
       {/* Menu Items */}
-      <div className="flex-1 px-4">
+      <div className="flex-1 px-4 mt-4">
         {menuItems.map((item, index) => (
           <div 
             key={index} 
