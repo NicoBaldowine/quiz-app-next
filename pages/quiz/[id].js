@@ -2,6 +2,14 @@ import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import QuizScreen from '../../components/QuizScreen';
+import { Loader2 } from "lucide-react"; // Make sure to install lucide-react if you haven't
+
+const LoadingSpinner = () => (
+  <div className="flex flex-col items-center justify-center h-screen bg-gray-900">
+    <Loader2 className="w-12 h-12 text-purple-600 animate-spin" />
+    <p className="mt-4 text-lg text-white">Loading quiz...</p>
+  </div>
+);
 
 export default function QuizPage() {
   const router = useRouter();
@@ -33,7 +41,7 @@ export default function QuizPage() {
     setCurrentQuestionIndex(prevIndex => prevIndex + 1);
   };
 
-  if (!quizData) return <div>Loading...</div>;
+  if (!quizData) return <LoadingSpinner />;
 
   return (
     <QuizScreen
