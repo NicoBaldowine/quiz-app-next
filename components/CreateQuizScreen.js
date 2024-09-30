@@ -29,7 +29,11 @@ const CreateQuizScreen = () => {
   const generateMultipleQuestions = async (count) => {
     const questions = [];
     for (let i = 0; i < count; i++) {
-      const question = await generateQuestion();
+      const response = await axios.post('/api/generate-quiz', { 
+        title,
+        existingQuestions: questions.map(q => q.question) // Send existing questions to avoid repetition
+      });
+      const question = response.data;
       if (question) {
         questions.push({
           question: question.question,
@@ -38,7 +42,7 @@ const CreateQuizScreen = () => {
         });
       }
     }
-    return questions; // Return the array directly, no need to stringify
+    return questions;
   };
 
   const createQuiz = async () => {

@@ -4,7 +4,7 @@ import axios from 'axios';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { title } = req.body;
+    const { title, existingQuestions = [] } = req.body;
 
     if (!title) {
       return res.status(400).json({ error: 'Title is required.' });
@@ -23,9 +23,10 @@ export default async function handler(req, res) {
               content: `Generate a unique and challenging quiz question based on the title: "${title}". 
               
               Rules:
-              1. The question should be different from previous questions.
-              2. Provide four answer choices without labeling them.
-              3. Specify the correct answer as the full text of the correct option.
+              1. The question must cover a different topic or aspect from these existing questions: ${existingQuestions.join('; ')}
+              2. Ensure the question explores a unique angle or subtopic related to the main title.
+              3. Provide four answer choices without labeling them.
+              4. Specify the correct answer as the full text of the correct option.
               
               Output your response exactly in the following JSON format (without any additional text or explanations):
 

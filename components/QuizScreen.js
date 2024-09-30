@@ -50,14 +50,32 @@ const QuizScreen = ({ questions, onRetry, onAnswerSubmit, quizId, topic }) => {
     }, 100);
   };
 
+  const resetTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    setQuizState(prevState => ({
+      ...prevState,
+      timeLeft: 10
+    }));
+
+    timerRef.current = setInterval(() => {
+      setQuizState(prevState => ({
+        ...prevState,
+        timeLeft: prevState.timeLeft > 0 ? prevState.timeLeft - 0.1 : 0
+      }));
+    }, 100);
+  };
+
   if (!questions || questions.length === 0) {
-    return <div>Loading questions...</div>;
+    return <div className="text-center text-white mt-8">Loading questions...</div>;
   }
 
   const currentQuestion = questions[quizState.currentQuestionIndex];
 
   if (!currentQuestion) {
-    return <div>No more questions available.</div>;
+    return <div className="text-center text-white mt-8">No more questions available.</div>;
   }
 
   const handleAnswer = (selectedAnswer) => {
@@ -91,8 +109,8 @@ const QuizScreen = ({ questions, onRetry, onAnswerSubmit, quizId, topic }) => {
         status: 'active',
         selectedAnswer: null,
         result: '',
-        timeLeft: 10
       }));
+      resetTimer();
     } else {
       // Quiz finished
       setQuizState(prevState => ({
@@ -132,8 +150,8 @@ const QuizScreen = ({ questions, onRetry, onAnswerSubmit, quizId, topic }) => {
       <TopBar />
       <ProgressBar timeLeft={quizState.timeLeft} />
       <QuizContent 
-        question={currentQuestion.question}
-        answers={currentQuestion.answers}
+        question={currentQuestion.question || "No question available"}
+        answers={currentQuestion.answers || []}
         selectedAnswer={quizState.selectedAnswer}
         handleAnswer={handleAnswer}
       />
@@ -163,18 +181,22 @@ const ProgressBar = ({ timeLeft }) => (
 );
 
 const QuizContent = ({ question, answers, selectedAnswer, handleAnswer }) => (
-  <div className="flex-1 flex flex-col px-4 mt-6"> {/* Changed mt-4 to mt-6 */}
+  <div className="flex-1 flex flex-col px-4 mt-6">
     <h2 className="text-2xl font-bold text-center mb-6">{question}</h2>
     <div className="w-full space-y-4">
-      {answers.map((answer, index) => (
-        <AnswerButton
-          key={index}
-          answer={answer}
-          index={index}
-          selectedAnswer={selectedAnswer}
-          handleAnswer={handleAnswer}
-        />
-      ))}
+      {Array.isArray(answers) ? (
+        answers.map((answer, index) => (
+          <AnswerButton
+            key={index}
+            answer={answer}
+            index={index}
+            selectedAnswer={selectedAnswer}
+            handleAnswer={handleAnswer}
+          />
+        ))
+      ) : (
+        <p className="text-center text-red-500">No answers available</p>
+      )}
     </div>
   </div>
 );
