@@ -94,7 +94,9 @@ const HomeScreen = () => {
   return (
     <div className="flex flex-col min-h-screen pb-16 bg-gray-900 text-white">
       <main className="flex-1 w-full overflow-y-auto">
-        {(quizzes.length > 0 || loading) && <h1 className="text-2xl font-bold p-4">Quizzes</h1>}
+        {(quizzes.length > 0 || loading) && (
+          <h1 className="text-2xl font-bold p-4">Quizzes</h1>
+        )}
         <div className="h-[calc(100vh-4rem)]">
           {loading ? (
             <SkeletonLoader />
@@ -132,7 +134,7 @@ const SkeletonLoader = () => (
 const EmptyQuizState = () => (
   <div className="flex flex-col items-center pt-12 px-4">
     <div className="text-4xl mb-4 w-8 h-8 flex items-center justify-center">✨</div>
-    <h3 className="text-2xl font-bold mb-4">Create a Quiz on Any Topic</h3>
+    <h3 className="text-2xl font-barlow-condensed font-bold mb-4">Create a Quiz on Any Topic</h3>
     <p className="text-gray-400 mb-12 text-center max-w-md"> {/* Changed mb-4 to mb-12 */}
       Discover new knowledge, test your skills, and learn something new along the way.
     </p>
@@ -185,7 +187,9 @@ const QuizCard = ({ quiz, onDelete }) => {
     <div className={`${cardColor} rounded-2xl overflow-hidden flex flex-col p-4 shadow-lg`}>
       <div className="mb-6">
         <p className="text-xs font-semibold text-gray-800 mb-1 opacity-60">LEVEL 1</p>
-        <h3 className="text-xl font-semibold text-gray-900">{quiz.title}</h3>
+        <h3 className="text-2xl font-barlow-condensed font-semibold text-gray-900 leading-tight">
+          {quiz.title}
+        </h3>
       </div>
       <div className="flex justify-between items-center mt-auto space-x-2">
         <button
