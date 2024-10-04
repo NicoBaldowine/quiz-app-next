@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { Button } from "@nextui-org/react";
-import { Play, Trash2, MoreVertical } from "lucide-react";
+import { Play, Trash2, MoreVertical, Share } from "lucide-react";
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
 import AuthScreen from './AuthScreen';
@@ -195,13 +195,13 @@ const QuizCard = ({ quiz, onDelete }) => {
         <button
           ref={menuButtonRef}
           onClick={handleMenuClick}
-          className="bg-gray-800 bg-opacity-15 hover:bg-opacity-25 text-gray-900 font-semibold p-2 text-sm rounded transition-colors duration-200 flex items-center justify-center w-10 h-9"
+          className="bg-black bg-opacity-5 hover:bg-opacity-10 text-gray-900 font-semibold p-2 text-sm rounded-lg transition-colors duration-200 flex items-center justify-center w-10 h-10"
         >
           <MoreVertical size={18} />
         </button>
         <button
           onClick={playQuiz}
-          className="bg-gray-800 bg-opacity-15 hover:bg-opacity-25 text-gray-900 font-semibold py-2 px-4 text-sm rounded transition-colors duration-200 flex-1"
+          className="border-2 border-black border-opacity-30 text-gray-900 font-semibold py-2 px-4 text-sm rounded-lg transition-colors duration-200 flex-1 hover:bg-black hover:bg-opacity-5"
         >
           Play
         </button>
@@ -214,27 +214,38 @@ const QuizCard = ({ quiz, onDelete }) => {
             top: `${menuPosition.top}px`,
             left: `${menuPosition.left}px`,
           }}
-          className="w-48 bg-white rounded-md shadow-lg z-50"
+          className="w-48 bg-white rounded-md shadow-lg z-50 py-1"
         >
           <button
             onClick={() => {
               playQuiz();
               setShowMenu(false);
             }}
-            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            className="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-gray-100"
           >
-            <Play size={18} className="mr-2" />
-            Play Quiz
+            <Play size={18} className="mr-3" />
+            <span className="text-sm font-medium">Play Quiz</span>
           </button>
+          <button
+            onClick={() => {
+              // Implement share functionality
+              setShowMenu(false);
+            }}
+            className="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-gray-100"
+          >
+            <Share size={18} className="mr-3" />
+            <span className="text-sm font-medium">Share</span>
+          </button>
+          <div className="border-t border-gray-200 my-1"></div>
           <button
             onClick={() => {
               onDelete(quiz.id);
               setShowMenu(false);
             }}
-            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            className="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-gray-100"
           >
-            <Trash2 size={18} className="mr-2" />
-            Delete
+            <Trash2 size={18} className="mr-3" />
+            <span className="text-sm font-medium">Delete</span>
           </button>
         </div>
       )}

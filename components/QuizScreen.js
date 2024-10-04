@@ -174,7 +174,7 @@ const TopBar = () => (
 const ProgressBar = ({ timeLeft }) => (
   <div className="w-full bg-gray-700 h-1">
     <div 
-      className="bg-purple-600 h-1 transition-all duration-100 ease-linear origin-left"
+      className="bg-white h-1 transition-all duration-100 ease-linear origin-left"
       style={{ width: `${100 - (timeLeft / 10) * 100}%` }}
     ></div>
   </div>
@@ -182,7 +182,7 @@ const ProgressBar = ({ timeLeft }) => (
 
 const QuizContent = ({ question, answers, selectedAnswer, handleAnswer }) => (
   <div className="flex-1 flex flex-col px-4 mt-6">
-    <h2 className="text-2xl font-bold text-center mb-6">{question}</h2>
+    <h2 className="text-2xl font-bold text-center mb-6 font-barlow-condensed">{question}</h2>
     <div className="w-full space-y-4">
       {Array.isArray(answers) ? (
         answers.map((answer, index) => (
@@ -204,7 +204,7 @@ const QuizContent = ({ question, answers, selectedAnswer, handleAnswer }) => (
 const AnswerButton = ({ answer, index, selectedAnswer, handleAnswer }) => {
   const optionLetters = ["A", "B", "C", "D"];
   const isDisabled = selectedAnswer !== null;
-  const buttonClass = `w-full text-left px-4 py-3 rounded-lg text-lg transition-colors duration-200 ${
+  const buttonClass = `w-full text-left px-4 py-3 rounded-lg text-base transition-colors duration-200 ${
     isDisabled
       ? "bg-gray-700 text-gray-400 cursor-not-allowed"
       : "bg-gray-800 text-white hover:bg-gray-700"
