@@ -3,8 +3,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import ResultScreen from "./ResultScreen";
 import { X } from "lucide-react";
+import axios from "axios";
 
-const QuizScreen = ({ questions, onRetry, onAnswerSubmit, quizId, topic }) => {
+const QuizScreen = ({ questions: initialQuestions, onRetry, onAnswerSubmit, quizId, topic }) => {
+  const [questions, setQuestions] = useState(initialQuestions);
   const [quizState, setQuizState] = useState({
     status: 'active',
     selectedAnswer: null,
@@ -13,6 +15,7 @@ const QuizScreen = ({ questions, onRetry, onAnswerSubmit, quizId, topic }) => {
     currentQuestionIndex: 0,
     correctAnswers: 0,
   });
+  const [loading, setLoading] = useState(false);
 
   const timerRef = useRef(null);
 
@@ -66,6 +69,38 @@ const QuizScreen = ({ questions, onRetry, onAnswerSubmit, quizId, topic }) => {
         timeLeft: prevState.timeLeft > 0 ? prevState.timeLeft - 0.1 : 0
       }));
     }, 100);
+  };
+
+  const generateMoreQuestions = async () => {
+    setLoading(true);
+    try {
+      const newQuestions = await generateMultipleQuestions(5, topic);
+      setQuestions(newQuestions);
+      resetQuiz();
+    } catch (error) {
+      console.error('Error generating more questions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generateMultipleQuestions = async (count, title) => {
+    const questions = [];
+    for (let i = 0; i < count; i++) {
+      const response = await axios.post('/api/generate-quiz', { 
+        title,
+        existingQuestions: questions.map(q => q.question)
+      });
+      const question = response.data;
+      if (question) {
+        questions.push({
+          question: question.question,
+          answers: question.answers,
+          correct_answer: question.correct_answer
+        });
+      }
+    }
+    return questions;
   };
 
   if (!questions || questions.length === 0) {
@@ -141,6 +176,8 @@ const QuizScreen = ({ questions, onRetry, onAnswerSubmit, quizId, topic }) => {
         correctAnswers={quizState.correctAnswers}
         totalQuestions={questions.length}
         onRetry={resetQuiz}
+        onMoreQuestions={generateMoreQuestions}
+        loading={loading}
       />
     );
   }
@@ -224,7 +261,7 @@ const AnswerButton = ({ answer, index, selectedAnswer, handleAnswer }) => {
   );
 };
 
-const FinalStatusScreen = ({ passed, correctAnswers, totalQuestions, onRetry }) => {
+const FinalStatusScreen = ({ passed, correctAnswers, totalQuestions, onRetry, onMoreQuestions, loading }) => {
   const emoji = passed ? "🎉" : "😢";
   const title = passed ? "Congratulations!" : "Better luck next time!";
   const description = `You got ${correctAnswers} out of ${totalQuestions} questions correct.`;
@@ -238,16 +275,25 @@ const FinalStatusScreen = ({ passed, correctAnswers, totalQuestions, onRetry }) 
         <p className="text-base text-gray-400 mb-8 text-center max-w-md">
           {description}
         </p>
-        <button
-          onClick={onRetry}
-          className="bg-transparent border border-white border-opacity-30 text-white font-normal py-2 px-6 rounded-[10px] transition-colors duration-200 hover:bg-white hover:bg-opacity-10"
-        >
-          Try Again
-        </button>
+        {passed ? (
+          <button
+            onClick={onMoreQuestions}
+            disabled={loading}
+            className="bg-transparent border border-white border-opacity-30 text-white font-normal py-2 px-6 rounded-[10px] transition-colors duration-200 hover:bg-white hover:bg-opacity-10"
+          >
+            {loading ? 'Generating...' : 'More Questions'}
+          </button>
+        ) : (
+          <button
+            onClick={onRetry}
+            className="bg-transparent border border-white border-opacity-30 text-white font-normal py-2 px-6 rounded-[10px] transition-colors duration-200 hover:bg-white hover:bg-opacity-10"
+          >
+            Try Again
+          </button>
+        )}
       </div>
     </div>
   );
 };
 
 export default QuizScreen;
-
