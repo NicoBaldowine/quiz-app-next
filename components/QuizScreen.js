@@ -204,7 +204,7 @@ const QuizContent = ({ question, answers, selectedAnswer, handleAnswer }) => (
 const AnswerButton = ({ answer, index, selectedAnswer, handleAnswer }) => {
   const optionLetters = ["A", "B", "C", "D"];
   const isDisabled = selectedAnswer !== null;
-  const buttonClass = `w-full text-left px-4 py-3 rounded-lg text-base transition-colors duration-200 ${
+  const buttonClass = `w-full flex items-center px-4 py-3 rounded-lg text-base transition-colors duration-200 ${
     isDisabled
       ? "bg-gray-700 text-gray-400 cursor-not-allowed"
       : "bg-gray-800 text-white hover:bg-gray-700"
@@ -216,33 +216,38 @@ const AnswerButton = ({ answer, index, selectedAnswer, handleAnswer }) => {
       disabled={isDisabled}
       className={buttonClass}
     >
-      {`${optionLetters[index]}) ${answer}`}
+      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-transparent border border-white border-opacity-30 flex items-center justify-center mr-3">
+        <span className="text-sm font-medium">{optionLetters[index]}</span>
+      </div>
+      <span className="flex-grow text-left">{answer}</span>
     </button>
   );
 };
 
-const FinalStatusScreen = ({ passed, correctAnswers, totalQuestions, onRetry }) => (
-  <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-    <TopBar />
-    <div className="flex-1 flex flex-col items-center px-4 pt-12"> {/* Added pt-12 for top padding */}
-      <div className="text-4xl mb-4 w-8 h-8 flex items-center justify-center">
-        {passed ? "🎉" : "😢"}
+const FinalStatusScreen = ({ passed, correctAnswers, totalQuestions, onRetry }) => {
+  const emoji = passed ? "🎉" : "😢";
+  const title = passed ? "Congratulations!" : "Better luck next time!";
+  const description = `You got ${correctAnswers} out of ${totalQuestions} questions correct.`;
+
+  return (
+    <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+      <TopBar />
+      <div className="flex-1 flex flex-col items-center px-4 pt-12">
+        <div className="text-4xl mb-4 w-12 h-12 flex items-center justify-center">{emoji}</div>
+        <h2 className="text-4xl font-bold text-center mb-3 font-barlow-condensed">{title}</h2>
+        <p className="text-base text-gray-400 mb-8 text-center max-w-md">
+          {description}
+        </p>
+        <button
+          onClick={onRetry}
+          className="bg-transparent border border-white border-opacity-30 text-white font-normal py-2 px-6 rounded-[10px] transition-colors duration-200 hover:bg-white hover:bg-opacity-10"
+        >
+          Try Again
+        </button>
       </div>
-      <h2 className="text-2xl font-bold text-center mb-2">
-        {passed ? "Congratulations!" : "Better luck next time!"}
-      </h2>
-      <p className="text-base text-gray-400 mb-8 text-center max-w-md">
-        You got {correctAnswers} out of {totalQuestions} questions correct.
-      </p>
-      <button
-        onClick={onRetry}
-        className="bg-purple-600 hover:bg-purple-700 text-white font-normal py-2 px-4 rounded"
-      >
-        Try Again
-      </button>
     </div>
-  </div>
-);
+  );
+};
 
 export default QuizScreen;
 

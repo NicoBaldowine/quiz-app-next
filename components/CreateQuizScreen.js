@@ -14,6 +14,11 @@ const CreateQuizScreen = () => {
   const [error, setError] = useState(null);
   const router = useRouter();
 
+  const suggestedTopics = [
+    "Space", "History", "Movies", "Science", "Literature", 
+    "Music", "Geography", "Technology"
+  ];
+
   const generateQuestion = async () => {
     try {
       const response = await axios.post('/api/generate-quiz', { title });
@@ -101,6 +106,11 @@ const CreateQuizScreen = () => {
     setTitle("");
   };
 
+  const handleTopicClick = (topic) => {
+    setTitle(topic);
+    createQuiz();
+  };
+
   if (quizData) {
     const currentQuestionIndex = quizData.currentQuestionIndex || 0;
     const currentQuestion = quizData.questions[currentQuestionIndex];
@@ -133,6 +143,8 @@ const CreateQuizScreen = () => {
         createQuiz={createQuiz}
         loading={loading}
         error={error}
+        suggestedTopics={suggestedTopics}
+        handleTopicClick={handleTopicClick}
       />
       {loading && <LoadingOverlay />}
     </div>
@@ -151,14 +163,14 @@ const TopBar = () => (
   </div>
 );
 
-const ContentSection = ({ title, setTitle, createQuiz, loading, error }) => (
+const ContentSection = ({ title, setTitle, createQuiz, loading, error, suggestedTopics, handleTopicClick }) => (
   <div className="flex-1 flex flex-col items-center justify-start w-full px-4 mt-8">
-    <h1 className="text-2xl font-bold mb-8 font-inter">Create a New Quiz</h1>
+    <h1 className="text-2xl font-bold mb-8 font-inter">Create Your Own Quiz</h1>
     <input
       type="text"
       value={title}
       onChange={(e) => setTitle(e.target.value)}
-      placeholder="Enter quiz title"
+      placeholder="What's your topic? (e.g., Space, History, Movies...)"
       className="w-full max-w-md px-4 py-2 rounded-md bg-gray-800 text-white mb-4"
     />
     <button
@@ -168,9 +180,24 @@ const ContentSection = ({ title, setTitle, createQuiz, loading, error }) => (
         loading || !title.trim() ? 'bg-gray-600 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
       } text-white transition-colors duration-200`}
     >
-      {loading ? 'Creating...' : 'Create Quiz'}
+      {loading ? 'Creating...' : 'Build My Quiz'}
     </button>
     {error && <p className="text-red-500 mt-4">{error}</p>}
+    
+    <div className="mt-8 w-full max-w-md">
+      <p className="text-sm text-gray-400 mb-2">Suggested topics:</p>
+      <div className="flex flex-wrap gap-2">
+        {suggestedTopics.map((topic, index) => (
+          <button
+            key={index}
+            onClick={() => handleTopicClick(topic)}
+            className="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded-full text-sm transition-colors duration-200"
+          >
+            {topic}
+          </button>
+        ))}
+      </div>
+    </div>
   </div>
 );
 
