@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { Button } from "@nextui-org/react";
-import { Play, Trash2, MoreVertical, Share } from "lucide-react";
+import { Play, Trash2, MoreVertical, Share, CheckCircle, XCircle } from "lucide-react";
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
 import AuthScreen from './AuthScreen';
@@ -56,6 +56,10 @@ const HomeScreen = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (session) loadQuizzes();
+  }, [session]);
+
   const loadQuizzes = async () => {
     setLoading(true);
     try {
@@ -65,6 +69,7 @@ const HomeScreen = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      console.log('Fetched quizzes:', data);
       setQuizzes(data);
     } catch (error) {
       console.error("Error loading quizzes:", error);
@@ -105,7 +110,7 @@ const HomeScreen = () => {
           ) : (
             <div className="grid grid-cols-2 gap-3 px-3">
               {quizzes.map((quiz) => (
-                <QuizCard key={quiz.id} quiz={quiz} onDelete={deleteQuiz} onPlay={() => router.push(`/quiz/${quiz.id}`)} />
+                <QuizCard key={quiz.id} quiz={quiz} onDelete={deleteQuiz} />
               ))}
             </div>
           )}
@@ -168,10 +173,6 @@ const QuizCard = ({ quiz, onDelete }) => {
     };
   }, []);
 
-  const playQuiz = () => {
-    router.push(`/quiz/${quiz.id}`);
-  };
-
   const handleMenuClick = () => {
     if (menuButtonRef.current) {
       const rect = menuButtonRef.current.getBoundingClientRect();
@@ -183,10 +184,28 @@ const QuizCard = ({ quiz, onDelete }) => {
     setShowMenu(!showMenu);
   };
 
+  const getStatusIcons = () => {
+    const correctCount = quiz.correct || 0;
+    const incorrectCount = quiz.incorrect || 0;
+
+    return (
+      <div className="flex items-center space-x-3 text-gray-600">
+        <div className="flex items-center">
+          <CheckCircle className="w-4 h-4 mr-1" />
+          <span className="text-xs font-medium">{correctCount}</span>
+        </div>
+        <div className="flex items-center">
+          <XCircle className="w-4 h-4 mr-1" />
+          <span className="text-xs font-medium">{incorrectCount}</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={`${cardColor} rounded-2xl overflow-hidden flex flex-col p-4 shadow-lg`}>
       <div className="mb-6">
-        <p className="text-xs font-semibold text-gray-800 mb-1 opacity-60">LEVEL 1</p>
+        <p className="mb-2">{getStatusIcons()}</p>
         <h3 className="text-2xl font-barlow-condensed font-semibold text-gray-900 leading-tight">
           {quiz.title}
         </h3>
@@ -200,7 +219,7 @@ const QuizCard = ({ quiz, onDelete }) => {
           <MoreVertical size={18} />
         </button>
         <button
-          onClick={playQuiz}
+          onClick={() => router.push(`/quiz/${quiz.id}`)}
           className="border-2 border-black border-opacity-30 text-gray-900 font-semibold py-2 px-4 text-sm rounded-lg transition-colors duration-200 flex-1 hover:bg-black hover:bg-opacity-5"
         >
           Play
@@ -218,7 +237,7 @@ const QuizCard = ({ quiz, onDelete }) => {
         >
           <button
             onClick={() => {
-              playQuiz();
+              router.push(`/quiz/${quiz.id}`);
               setShowMenu(false);
             }}
             className="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-gray-100"

@@ -11,16 +11,9 @@ const barlowCondensed = Barlow_Condensed({
 
 function MyApp({ Component, pageProps }) {
   return (
-    <>
-      <style jsx global>{`
-        :root {
-          --font-barlow-condensed: ${barlowCondensed.style.fontFamily};
-        }
-      `}</style>
-      <main className={`${inter.className} ${barlowCondensed.variable}`}>
-        <Component {...pageProps} />
-      </main>
-    </>
+    <main className={`${inter.className} ${barlowCondensed.variable}`}>
+      <Component {...pageProps} />
+    </main>
   );
 }
 

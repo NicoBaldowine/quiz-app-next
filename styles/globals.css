@@ -12,3 +12,5 @@
 .font-barlow-condensed {
   font-family: var(--font-barlow-condensed), sans-serif !important;
 }
+
+@import './custom.css';

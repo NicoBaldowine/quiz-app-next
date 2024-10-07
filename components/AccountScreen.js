@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, MessageSquare, Bug, LogOut } from 'lucide-react';
+import { X, MessageSquare, Bug, LogOut, Globe } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
 
@@ -10,7 +10,6 @@ const AccountScreen = () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      // Redirect to home page or login page after successful logout
       router.push('/');
     } catch (error) {
       console.error('Error logging out:', error.message);
@@ -18,6 +17,7 @@ const AccountScreen = () => {
   };
 
   const menuItems = [
+    { title: 'Language', icon: Globe, action: () => console.log('Change language') },
     { title: 'Give feedback', icon: MessageSquare, action: () => console.log('Give feedback') },
     { title: 'Report a bug', icon: Bug, action: () => console.log('Report a bug') },
     { title: 'Log out', icon: LogOut, action: handleLogout },
@@ -39,11 +39,11 @@ const AccountScreen = () => {
       </div>
 
       {/* Menu Items */}
-      <div className="flex-1 px-4 mt-4">
+      <div className="flex-1">
         {menuItems.map((item, index) => (
           <div 
             key={index} 
-            className="flex items-center p-4 border-b border-gray-800 cursor-pointer hover:bg-gray-800"
+            className="flex items-center p-4 border-b border-gray-800 cursor-pointer hover:bg-gray-800 w-full"
             onClick={item.action}
           >
             <item.icon className="h-6 w-6 mr-4" />

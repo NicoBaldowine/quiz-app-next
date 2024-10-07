@@ -4,8 +4,11 @@ import React, { useState, useEffect, useRef } from "react";
 import ResultScreen from "./ResultScreen";
 import { X } from "lucide-react";
 import axios from "axios";
+import { supabase } from '../lib/supabaseClient';
+import { useRouter } from 'next/router';
 
 const QuizScreen = ({ questions: initialQuestions, onRetry, onAnswerSubmit, quizId, topic }) => {
+  const router = useRouter();
   const [questions, setQuestions] = useState(initialQuestions);
   const [quizState, setQuizState] = useState({
     status: 'active',
@@ -103,14 +106,80 @@ const QuizScreen = ({ questions: initialQuestions, onRetry, onAnswerSubmit, quiz
     return questions;
   };
 
+  const updateQuizStats = async (passed) => {
+    try {
+      console.log('Updating quiz stats. Passed:', passed);
+      const { data: currentQuiz, error: fetchError } = await supabase
+        .from('quizzes')
+        .select('correct, incorrect')
+        .eq('id', quizId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      console.log('Current quiz stats:', currentQuiz);
+
+      const updatedCounts = {
+        correct: passed ? (currentQuiz.correct || 0) + 1 : (currentQuiz.correct || 0),
+        incorrect: passed ? (currentQuiz.incorrect || 0) : (currentQuiz.incorrect || 0) + 1
+      };
+
+      console.log('Updated counts:', updatedCounts);
+
+      const { data, error } = await supabase
+        .from('quizzes')
+        .update(updatedCounts)
+        .eq('id', quizId)
+        .select();
+
+      if (error) throw error;
+      console.log('Updated quiz stats:', data);
+      
+      // Remove the automatic navigation
+      // router.push('/', undefined, { shallow: true });
+    } catch (error) {
+      console.error('Error updating quiz stats:', error);
+    }
+  };
+
+  const handleQuizCompletion = () => {
+    const passed = quizState.correctAnswers >= 4;
+    updateQuizStats(passed);
+    setQuizState(prevState => ({
+      ...prevState,
+      status: 'finished'
+    }));
+  };
+
+  // Use this function when the last question is answered or time runs out
+  useEffect(() => {
+    if (quizState.currentQuestionIndex === questions.length - 1 && quizState.selectedAnswer !== null) {
+      handleQuizCompletion();
+    }
+  }, [quizState.currentQuestionIndex, quizState.selectedAnswer]);
+
+  const handleClose = () => {
+    router.push('/');  // Navigate back to the home page
+  };
+
   if (!questions || questions.length === 0) {
-    return <div className="text-center text-white mt-8">Loading questions...</div>;
+    return (
+      <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+        <TopBar onClose={handleClose} />
+        <div className="text-center text-white mt-8">Loading questions...</div>
+      </div>
+    );
   }
 
   const currentQuestion = questions[quizState.currentQuestionIndex];
 
   if (!currentQuestion) {
-    return <div className="text-center text-white mt-8">No more questions available.</div>;
+    return (
+      <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+        <TopBar onClose={handleClose} />
+        <div className="text-center text-white mt-8">No more questions available.</div>
+      </div>
+    );
   }
 
   const handleAnswer = (selectedAnswer) => {
@@ -144,10 +213,12 @@ const QuizScreen = ({ questions: initialQuestions, onRetry, onAnswerSubmit, quiz
         status: 'active',
         selectedAnswer: null,
         result: '',
+        timeLeft: 10
       }));
       resetTimer();
     } else {
-      // Quiz finished
+      const passed = quizState.correctAnswers >= 4;
+      updateQuizStats(passed); // Update stats immediately when quiz is finished
       setQuizState(prevState => ({
         ...prevState,
         status: 'finished'
@@ -157,34 +228,41 @@ const QuizScreen = ({ questions: initialQuestions, onRetry, onAnswerSubmit, quiz
 
   if (quizState.status === 'answered') {
     return (
-      <ResultScreen
-        result={quizState.result}
-        correctAnswer={currentQuestion.correct_answer}
-        onNextQuestion={handleNextQuestion}
-        quizId={quizId}
-        topic={topic}
-        isLastQuestion={quizState.currentQuestionIndex === questions.length - 1}
-      />
+      <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+        <TopBar onClose={handleClose} />
+        <ResultScreen
+          result={quizState.result}
+          correctAnswer={currentQuestion.correct_answer}
+          onNextQuestion={handleNextQuestion}
+          quizId={quizId}
+          topic={topic}
+          isLastQuestion={quizState.currentQuestionIndex === questions.length - 1}
+        />
+      </div>
     );
   }
 
   if (quizState.status === 'finished') {
     const passed = quizState.correctAnswers >= 4;
     return (
-      <FinalStatusScreen
-        passed={passed}
-        correctAnswers={quizState.correctAnswers}
-        totalQuestions={questions.length}
-        onRetry={resetQuiz}
-        onMoreQuestions={generateMoreQuestions}
-        loading={loading}
-      />
+      <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+        <TopBar onClose={handleClose} />
+        <FinalStatusScreen
+          passed={passed}
+          correctAnswers={quizState.correctAnswers}
+          totalQuestions={questions.length}
+          onRetry={resetQuiz}
+          onMoreQuestions={generateMoreQuestions}
+          loading={loading}
+          updateQuizStats={updateQuizStats}
+        />
+      </div>
     );
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-      <TopBar />
+      <TopBar onClose={handleClose} />
       <ProgressBar timeLeft={quizState.timeLeft} />
       <QuizContent 
         question={currentQuestion.question || "No question available"}
@@ -196,10 +274,10 @@ const QuizScreen = ({ questions: initialQuestions, onRetry, onAnswerSubmit, quiz
   );
 };
 
-const TopBar = () => (
+const TopBar = ({ onClose }) => (
   <div className="w-full px-4 py-2 flex justify-end items-center border-b border-gray-800">
     <button
-      onClick={() => window.history.back()}
+      onClick={onClose}
       className="text-white hover:bg-gray-800 h-10 w-10 flex items-center justify-center rounded-full"
     >
       <X className="h-6 w-6" />
@@ -244,7 +322,7 @@ const AnswerButton = ({ answer, index, selectedAnswer, handleAnswer }) => {
   const buttonClass = `w-full flex items-center px-4 py-3 rounded-lg text-base transition-colors duration-200 ${
     isDisabled
       ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-      : "bg-gray-800 text-white hover:bg-gray-700"
+      : "bg-gray-800 text-white hover-bg-gray-700"
   }`;
 
   return (
@@ -261,36 +339,55 @@ const AnswerButton = ({ answer, index, selectedAnswer, handleAnswer }) => {
   );
 };
 
-const FinalStatusScreen = ({ passed, correctAnswers, totalQuestions, onRetry, onMoreQuestions, loading }) => {
+const FinalStatusScreen = ({ 
+  passed, 
+  correctAnswers, 
+  totalQuestions, 
+  onRetry, 
+  onMoreQuestions, 
+  loading, 
+  updateQuizStats
+}) => {
   const emoji = passed ? "🎉" : "😢";
   const title = passed ? "Congratulations!" : "Better luck next time!";
   const description = `You got ${correctAnswers} out of ${totalQuestions} questions correct.`;
 
+  const handleMoreQuestions = () => {
+    updateQuizStats(true);  // Count as a pass
+    onMoreQuestions();
+  };
+
+  const handleRetry = () => {
+    updateQuizStats(false);  // Count as a fail
+    onRetry();
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-      <TopBar />
       <div className="flex-1 flex flex-col items-center px-4 pt-12">
         <div className="text-4xl mb-4 w-12 h-12 flex items-center justify-center">{emoji}</div>
         <h2 className="text-4xl font-bold text-center mb-3 font-barlow-condensed">{title}</h2>
         <p className="text-base text-gray-400 mb-8 text-center max-w-md">
           {description}
         </p>
-        {passed ? (
-          <button
-            onClick={onMoreQuestions}
-            disabled={loading}
-            className="bg-transparent border border-white border-opacity-30 text-white font-normal py-2 px-6 rounded-[10px] transition-colors duration-200 hover:bg-white hover:bg-opacity-10"
-          >
-            {loading ? 'Generating...' : 'More Questions'}
-          </button>
-        ) : (
-          <button
-            onClick={onRetry}
-            className="bg-transparent border border-white border-opacity-30 text-white font-normal py-2 px-6 rounded-[10px] transition-colors duration-200 hover:bg-white hover:bg-opacity-10"
-          >
-            Try Again
-          </button>
-        )}
+        <div className="space-y-4">
+          {passed ? (
+            <button
+              onClick={handleMoreQuestions}
+              disabled={loading}
+              className="w-full bg-transparent border border-white border-opacity-30 text-white font-normal py-2 px-6 rounded-[10px] transition-colors duration-200 hover:bg-white hover:bg-opacity-10"
+            >
+              {loading ? 'Generating...' : 'More Questions'}
+            </button>
+          ) : (
+            <button
+              onClick={handleRetry}
+              className="w-full bg-transparent border border-white border-opacity-30 text-white font-normal py-2 px-6 rounded-[10px] transition-colors duration-200 hover:bg-white hover:bg-opacity-10"
+            >
+              Try Again
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,5 @@
+@media (hover: hover) {
+  .hover-bg-gray-700:hover {
+    background-color: rgba(55, 65, 81, 1);
+  }
+}
